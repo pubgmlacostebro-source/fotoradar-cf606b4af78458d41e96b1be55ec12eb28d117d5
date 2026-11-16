@@ -64,4 +64,25 @@ class SourceTests(unittest.TestCase):
         self.assertEqual(leads[0]['src'],'jobs')
         self.assertIn('вакансия',leads[0]['tags'])
 
+class ProfiTests(unittest.TestCase):
+    def test_original_url_date_city_and_service(self):
+        now=dt.datetime.now(dt.timezone(dt.timedelta(hours=3)))
+        row={'id':'123','receivd':now.strftime('%a %b %d %Y %H:%M:%S GMT%z')+' (MSK)',
+             'geoplaces':[{'name':'Екатеринбург'}], 'pservices':[{'id':'26500'}],
+             'detailsPublic':'Фотосессия в студии', 'name':'Тест', 'wpriceMax':'3000'}
+        old=dict(row,id='124',receivd='Sun Nov 15 2020 16:12:11 GMT+0300 (MSK)')
+        other=dict(row,id='125',geoplaces=[{'name':'Полевской'}])
+        unrelated=dict(row,id='126',pservices=[{'id':'101'}])
+        data={'props':{'pageProps':{'legoData':{'legoLandingData':{'blocks':[{'currentOrders':[row,old,other,unrelated]}]}}}}}
+        page='<script id="__NEXT_DATA__">'+json.dumps(data)+'</script>'+''.join('/backoffice/n.php?o='+x for x in ['123','124','125','126'])
+        with patch.object(c,'http_get',return_value=page): leads,note=c.fetch_profi()
+        self.assertEqual(len(leads),1)
+        self.assertEqual(leads[0]['url'],'https://profi.ru/backoffice/n.php?o=123')
+        self.assertLess(abs(leads[0]['ts']-now.timestamp()),2)
+
+    def test_generic_page_is_unavailable_not_empty_success(self):
+        with patch.object(c,'http_get',return_value='<html>Sign in</html>'):
+            leads,note=c.fetch_profi()
+        self.assertIsNone(leads)
+
 if __name__=='__main__': unittest.main()

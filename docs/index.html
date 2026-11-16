@@ -253,7 +253,7 @@ function renderFeed() {
   }
   if (!list.length) {
     $('feed').innerHTML = '<div class="empty"><strong>Пока объявлений нет</strong>' +
-      'Как только кто-то напишет, что ищет фотографа, объявление появится здесь, а вам придёт уведомление.</div>';
+      'В проверенных источниках за выбранный период совпадений нет. Это не означает, что заказов нет в других группах или комментариях.</div>';
     return;
   }
   $('feed').innerHTML = list.map((l) => {
@@ -277,7 +277,7 @@ function renderSources() {
   if (!rows.length) { $('sourceSummary').textContent = 'Источники: проверка ещё не выполнена'; return; }
   const available = rows.filter(s => s.ok).length;
   const scanned = rows.reduce((n,s) => n + (s.scanned || 0), 0);
-  $('sourceSummary').textContent = 'Источники: доступны ' + available + ' из ' + rows.length + ' · проверено постов: ' + scanned;
+  $('sourceSummary').textContent = 'Источники: доступны ' + available + ' из ' + rows.length + ' · проверок записей и номеров: ' + scanned;
   $('sourceList').innerHTML = rows.map(s => '<div class="source-row"><a href="' + esc(safeUrl(s.url)) + '" target="_blank" rel="noopener">' + esc(s.title) + '</a><span class="availability ' + (s.ok ? 'ok' : '') + '">' + (s.ok ? 'Доступен' : 'Недоступен') + '</span><small>' + esc(s.kind) + ' · проверено: ' + Number(s.scanned || 0) + ' · совпадений до удаления повторов: ' + Number(s.matched || 0) + (s.note ? ' · ' + esc(s.note) : '') + '</small></div>').join('');
 }
 function render() { renderStatus(); renderSources(); renderBar(); renderFeed(); }
@@ -415,5 +415,5 @@ if ('Notification' in window && Notification.permission === 'granted') setupPush
 load();
 setInterval(load, 60000);
 </script>
-</body>
+<script src="run-search.js"></script></body>
 </html>

@@ -434,7 +434,7 @@ def fetch_rss():
             try:
                 ts = parsedate_to_datetime(item.findtext("pubDate")).timestamp()
             except Exception:
-                ts = NOW
+                continue
             if ts < CUTOFF or not link:
                 continue
             text = f"{title}\n{desc}"
@@ -493,6 +493,52 @@ def fetch_trudvsem():
         return None, type(exc).__name__ + ': ' + str(exc)[:150]
 
 
+
+def fetch_profi():
+    url = 'https://profi.ru/geo-ekt/rabota/krasota/rabota-sportivnym-fotografom/'
+    try:
+        page = http_get(url, timeout=25)
+        match = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', page, re.S)
+        if not match:
+            raise ValueError('Public order data unavailable')
+        blocks = json.loads(match.group(1))['props']['pageProps']['legoData']['legoLandingData']['blocks']
+        rows = [row for b in blocks for row in b.get('currentOrders', [])]
+        if not any('currentOrders' in b for b in blocks):
+            raise ValueError('Order list unavailable')
+        out, latest = [], 0
+        for row in rows:
+            # Public page has links to the original orders; never invent a URL.
+            oid = str(row.get('id', ''))
+            href = '/backoffice/n.php?o=' + oid
+            if not oid.isdigit() or href not in page:
+                continue
+            services = row.get('pservices', [])
+            if not any(str(x.get('id')) == '26500' or str(x.get('topId')) == '26500' for x in services):
+                continue
+            places = ' '.join(x.get('name','') for x in row.get('geoplaces',[]))
+            if 'екатеринбург' not in places.casefold() and places not in ['Ботанический','Академический','Центральный']:
+                continue
+            raw = re.sub(r'\s*\([^)]*\)$', '', row.get('receivd',''))
+            try:
+                stamp = dt.datetime.strptime(raw, '%a %b %d %Y %H:%M:%S GMT%z').timestamp()
+            except ValueError:
+                continue
+            latest = max(latest, stamp)
+            if stamp < CUTOFF or stamp > NOW + 300:
+                continue
+            text = row.get('detailsPublic') or row.get('aim') or ''
+            price = row.get('wpriceMax')
+            if price and price != '0':
+                text += '\nБюджет до ' + str(price) + ' ₽'
+            tags = [name for name, rx in TAGS if rx.search(text)]
+            if price and price != '0': tags.append('есть бюджет')
+            out.append(make_lead('rss','profi:'+oid,'Профи.ру · Екатеринбург','https://profi.ru'+href,text,row.get('name',''),stamp,tags))
+        record_source('profi','Профи.ру — заказы фотографам',url,'Заказы',True,len(rows),len(out),int(latest),'Открытая страница; отклик может требовать регистрации и оплаты на Профи.ру')
+        return out, 'Открытые заказы: ' + str(len(out))
+    except Exception as exc:
+        record_source('profi','Профи.ру — заказы фотографам',url,'Заказы',False,note=str(exc)[:150])
+        return None, type(exc).__name__ + ': ' + str(exc)[:150]
+
 def send_push(new_leads):
     subs_raw = os.environ.get("PUSH_SUBSCRIPTIONS", "").strip()
     key = os.environ.get("VAPID_PRIVATE_KEY", "").strip()
@@ -540,7 +586,7 @@ def main():
 
     sources = [("vk", "ВКонтакте", fetch_vk), ("tg_web", "Telegram-каналы", fetch_tg_web),
                ("tg_public", "Telegram: открытые чаты", fetch_tg_public),
-               ("tg_chats", "Telegram: дополнительные чаты (API)", fetch_tg_chats), ("rss", "Биржи", fetch_rss), ("jobs", "Работа России", fetch_trudvsem)]
+               ("tg_chats", "Telegram: дополнительные чаты (API)", fetch_tg_chats), ("rss", "FL.ru", fetch_rss), ("profi", "Профи.ру", fetch_profi), ("jobs", "Работа России", fetch_trudvsem)]
     status_sources, new = {}, []
     for key, title, fn in sources:
         try:
