@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>Фоторадар</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#17141f">
+<style>
+:root {
+  --bg: #17141f; --card: #221e2d; --card-new: #2b2438; --line: #352f45;
+  --text: #f1edf7; --muted: #a39bb5; --accent: #ffb454; --accent-ink: #2a1c05;
+  --vk: #5b9bff; --tg: #4cc3f1; --rss: #9bd67a; --danger: #ff8a7a;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f3ee; --card: #ffffff; --card-new: #fff6e6; --line: #e6dfd5;
+    --text: #221d2b; --muted: #746c82; --accent: #d97a00; --accent-ink: #ffffff;
+    --vk: #2a6fe0; --tg: #1790c4; --rss: #4c8f2a; --danger: #c8432f;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: 0 16px calc(32px + env(safe-area-inset-bottom));
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+header { padding: 22px 0 6px; display: flex; align-items: center; gap: 12px; }
+.logo { width: 40px; height: 40px; border-radius: 12px; flex: none; }
+h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
+.sub { color: var(--muted); font-size: 13px; margin: 0; }
+.grow { flex: 1; min-width: 0; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+.btn {
+  background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 14px;
+  padding: 9px 14px; border-radius: 999px; white-space: nowrap;
+}
+@media (max-width: 480px) {
+  header { flex-wrap: wrap; }
+  header .btn { width: 100%; margin-top: 4px; }
+}
+.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 500; }
+.btn.on { background: transparent; color: var(--muted); border: 1px solid var(--line); font-weight: 500; }
+
+.status { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); padding: 10px 0 4px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-right: 6px; opacity: .5; }
+.dot.ok { background: #5fd38a; opacity: 1; }
+.src-state { white-space: nowrap; }
+.manual-run { margin: 12px 0; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.manual-run .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.manual-run a.btn { display: inline-flex; text-decoration: none; }
+.manual-run a:focus-visible, .manual-run button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.bar::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line);
+  font-size: 14px; color: var(--muted); background: transparent;
+}
+.chip.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+.chip b { font-weight: 600; opacity: .7; margin-left: 4px; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 14px 16px; margin: 0 0 12px; position: relative;
+}
+.card.fresh { background: var(--card-new); border-color: var(--accent); }
+.meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.badge { font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 6px; color: #fff; }
+.badge.vk { background: var(--vk); } .badge.tg { background: var(--tg); } .badge.rss { background: var(--rss); } .badge.jobs { background: var(--rss); }
+.new-mark { color: var(--accent); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.place { color: var(--text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.text { margin: 10px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.text.clip { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+.more { color: var(--accent); font-size: 14px; padding: 0 0 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tag { font-size: 12px; padding: 3px 9px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-weight: 600; }
+.tag.hot { background: color-mix(in srgb, var(--danger) 18%, transparent); color: var(--danger); }
+.actions { display: flex; gap: 8px; align-items: center; }
+.actions a.btn { text-decoration: none; display: inline-block; }
+.hide { margin-left: auto; color: var(--muted); font-size: 14px; padding: 8px 4px; }
+
+.empty { text-align: center; color: var(--muted); padding: 48px 12px; border: 1px dashed var(--line); border-radius: 16px; }
+.empty strong { display: block; color: var(--text); font-size: 17px; margin-bottom: 6px; }
+.note { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font-size: 14px; margin: 6px 0 4px; color: var(--muted); }
+.note b { color: var(--text); }
+
+dialog { background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 18px; padding: 20px; max-width: min(520px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(0,0,0,.6); }
+dialog h2 { margin: 0 0 8px; font-size: 18px; }
+dialog p { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+dialog textarea { width: 100%; height: 110px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 8px; font: 12px/1.4 ui-monospace, Consolas, monospace; resize: none; }
+dialog .row { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+.search-panel { margin: 6px 0 16px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+.search-panel > label { display: block; font-weight: 600; margin-bottom: 8px; }
+#searchInput, #searchAge { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; max-width: 100%; }
+#searchInput { width: 100%; }
+.search-options { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 10px 0; font-size: 14px; }
+.external-search { display: inline-block; color: var(--accent); margin-top: 10px; font-size: 14px; }
+#searchInput:focus-visible, #searchAge:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.source-panel { margin: 10px 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); font-size: 14px; }
+summary { cursor: pointer; font-weight: 600; }
+.source-row { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; border-top: 1px solid var(--line); padding: 10px 0; }
+.source-row:first-child { margin-top: 10px; }
+.source-row a, .external-links a { color: var(--accent); overflow-wrap: anywhere; }
+.source-row small { color: var(--muted); grid-column: 1 / -1; }
+.source-row .availability { font-size: 12px; color: var(--muted); }
+.source-row .availability.ok { color: #53b97c; }
+.external-panel { padding-top: 12px; font-size: 14px; }
+.external-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 10px; }
+#searchType { font: inherit; padding: 10px; border-radius: 10px; border: 1px solid var(--line); color: var(--text); background: var(--bg); max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img class="logo" src="icon-192.png" alt="">
+    <div class="grow">
+      <h1>Фоторадар</h1>
+      <p class="sub">Кто ищет фотографа в Екатеринбурге</p>
+    </div>
+    <button class="btn" id="notifyBtn">Включить уведомления</button>
+  </header>
+
+  <section class="manual-run" aria-label="Запуск свежего поиска">
+    <div class="row">
+      <a class="btn" id="manualRunBtn" href="https://github.com/pubgmlacostebro-source/fotoradar-cf606b4af78458d41e96b1be55ec12eb28d117d5/actions/workflows/collect.yml" target="_blank" rel="noopener">Найти сейчас ↗</a>
+      <button class="btn ghost" id="refreshBtn" type="button">Обновить результаты</button>
+    </div>
+    <p class="sub">Откроется GitHub. Нажмите <b>Run workflow</b>, затем ещё раз <b>Run workflow</b>. Нужен вход в аккаунт с правом запуска.</p>
+    <p class="sub">Когда поиск завершится, вернитесь сюда: лента обновляется автоматически. Поиск обычно занимает около минуты после старта, но возможна очередь GitHub.</p>
+    <p class="sub" id="refreshNote" role="status" aria-live="polite"></p>
+  </section>
+  <div class="status" id="status"></div>
+  <div id="notes"></div>
+  <details class="source-panel"><summary id="sourceSummary">Источники и доступ</summary><div id="sourceList"></div></details>
+  <div class="bar" id="bar"></div>
+  <section class="search-panel" aria-label="Поиск объявлений">
+    <label for="searchInput">Найти съёмку</label>
+    <input id="searchInput" type="search" placeholder="Например: свадьба, новогодняя, контент" autocomplete="off">
+    <div class="search-options"><label for="searchAge">Опубликовано</label>
+      <select id="searchAge"><option value="0">За всё время</option><option value="1">За сутки</option><option value="3">За 3 дня</option><option value="7">За неделю</option></select>
+      <label for="searchType">Тип</label><select id="searchType"><option value="all">Все предложения</option><option value="requests">Заказы на съёмку</option><option value="vacancies">Вакансии</option></select>
+      <button class="btn ghost" id="searchReset" type="button">Сбросить</button>
+    </div>
+    <p id="searchCount" class="sub" aria-live="polite"></p>
+    <p class="sub">Поиск по объявлениям, которые уже собрал Фоторадар.</p>
+    <a id="vkSearch" target="_blank" rel="noopener" class="external-search">Искать этот запрос во ВКонтакте ↗</a>
+  <details class="external-panel"><summary>Поиск на других площадках</summary>
+      <p class="sub">Открываются отдельно. Автосбор этих площадок не подключён; актуальность и условия отклика проверяйте на них.</p>
+      <div class="external-links"><a href="https://youdo.com/g-ekb/rabota/fotovideouslugi" target="_blank" rel="noopener">YouDo</a><a href="https://profi.ru/geo-ekt/krasota/photographer/" target="_blank" rel="noopener">Профи.ру</a><a id="avitoSearch" target="_blank" rel="noopener">Авито</a><a id="hhSearch" target="_blank" rel="noopener">hh.ru</a><a id="webSearch" target="_blank" rel="noopener">Поиск в интернете</a></div>
+    </details>
+  </section>
+  <main id="feed"></main>
+</div>
+
+<dialog id="pushDialog">
+  <h2>Последний шаг</h2>
+  <p>Уведомления на открытом сайте уже работают. Чтобы они приходили и при закрытом сайте, скопируйте этот код и отправьте тому, кто настраивал Фоторадар — его нужно один раз добавить в настройки (PUSH_SUBSCRIPTIONS).</p>
+  <textarea id="pushCode" readonly></textarea>
+  <div class="row">
+    <button class="btn ghost" id="pushClose">Закрыть</button>
+    <button class="btn" id="pushCopy">Скопировать</button>
+  </div>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch (_) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
+};
+const SRC = { vk: 'ВКонтакте', tg: 'Telegram', rss: 'Биржи', jobs: 'Вакансии' };
+const BADGE = { vk: 'VK', tg: 'TG', rss: 'Биржа', jobs: 'Работа' };
+
+let sourceReport = null;
+let leads = [], status = null, filter = 'all', firstLoad = true, unread = 0, swReg = null;
+const known = new Set(store.get('known', []));
+const hidden = new Set(store.get('hidden', []));
+const fresh = new Set();
+const opened = new Set();
+const firstVisit = known.size === 0;
+let searchQuery = '', searchDays = 0, searchType = 'all';
+function matchesSearch(l) {
+  const normalize = (v) => String(v || '').toLocaleLowerCase('ru').replace(/ё/g, 'е');
+  const words = normalize(searchQuery).trim().split(/\s+/).filter(Boolean);
+  const haystack = normalize([l.text, l.place, l.author, ...(l.tags || [])].join(' '));
+  return (searchType === 'all' || (searchType === 'vacancies' ? (l.tags || []).includes('вакансия') : !(l.tags || []).includes('вакансия'))) && words.every((w) => haystack.includes(w)) && (!searchDays || l.ts >= Date.now() / 1000 - searchDays * 86400);
+}
+function updateSearch() {
+  searchQuery = $('searchInput').value;
+  searchDays = Number($('searchAge').value);
+  searchType = $('searchType').value;
+  const query = [searchQuery.trim() || 'ищу фотографа', 'Екатеринбург'].join(' ');
+  $('vkSearch').href = 'https://vk.com/search?c[section]=statuses&c[q]=' + encodeURIComponent(query);
+  $('avitoSearch').href = 'https://www.avito.ru/ekaterinburg?q=' + encodeURIComponent(query);
+  $('hhSearch').href = 'https://ekaterinburg.hh.ru/search/vacancy?area=3&text=' + encodeURIComponent(searchQuery.trim() || 'фотограф');
+  $('webSearch').href = 'https://yandex.ru/search/?text=' + encodeURIComponent('Екатеринбург ' + (searchQuery.trim() || 'ищу фотографа нужен фотограф'));
+  renderBar(); renderFeed();
+}
+$('searchInput').addEventListener('input', updateSearch);
+$('searchAge').addEventListener('change', updateSearch);
+$('searchType').addEventListener('change', updateSearch);
+$('searchReset').onclick = () => { $('searchInput').value = ''; $('searchAge').value = '0'; $('searchType').value = 'all'; updateSearch(); };
+
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeUrl = (u) => (/^https:\/\//.test(u) ? u : '#');
+
+function ago(ts) {
+  const s = Date.now() / 1000 - ts;
+  if (s < 90) return 'только что';
+  if (s < 3600) return Math.round(s / 60) + ' мин назад';
+  if (s < 86400) return Math.round(s / 3600) + ' ч назад';
+  const d = new Date(ts * 1000);
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + ', ' +
+         d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderStatus() {
+  if (!status) { $('status').innerHTML = ''; return; }
+  const parts = ['<span>Проверено ' + ago(status.checked) + '</span>'];
+  const off = [];
+  for (const s of Object.values(status.sources || {})) {
+    parts.push('<span class="src-state"><span class="dot ' + (s.ok ? 'ok' : '') + '"></span>' + esc(s.title) + '</span>');
+    if (!s.ok) off.push('<b>' + esc(s.title) + '</b> — ' + esc(s.note || 'не подключено'));
+  }
+  $('status').innerHTML = parts.join('');
+  $('notes').innerHTML = off.length ? '<div class="note">Не подключено: ' + off.join('; ') + '.</div>' : '';
+}
+
+function renderBar() {
+  const visible = leads.filter((l) => !hidden.has(l.id) && matchesSearch(l));
+  const count = (k) => visible.filter((l) => k === 'all' || l.src === k || (k === 'hot' && l.tags.includes('срочно'))).length;
+  const chips = [['all', 'Все'], ['hot', 'Срочные'], ['vk', SRC.vk], ['tg', SRC.tg], ['rss', SRC.rss], ['jobs', SRC.jobs]];
+  $('bar').innerHTML = chips.map(([k, t]) =>
+    '<button class="chip ' + (filter === k ? 'active' : '') + '" data-f="' + k + '">' + t + '<b>' + count(k) + '</b></button>').join('');
+}
+
+function renderFeed() {
+  const list = leads.filter((l) => !hidden.has(l.id) && matchesSearch(l) &&
+    (filter === 'all' || l.src === filter || (filter === 'hot' && l.tags.includes('срочно'))));
+  $('searchCount').textContent = 'Найдено: ' + list.length;
+  if (!list.length && (searchQuery.trim() || searchDays || searchType !== 'all')) {
+    $('feed').innerHTML = '<div class="empty"><strong>По вашему запросу ничего не найдено</strong>Попробуйте другие слова или увеличьте период поиска.</div>';
+    return;
+  }
+  if (!list.length) {
+    $('feed').innerHTML = '<div class="empty"><strong>Пока объявлений нет</strong>' +
+      'Как только кто-то напишет, что ищет фотографа, объявление появится здесь, а вам придёт уведомление.</div>';
+    return;
+  }
+  $('feed').innerHTML = list.map((l) => {
+    const long = l.text.length > 420 && !opened.has(l.id);
+    return '<article class="card ' + (fresh.has(l.id) ? 'fresh' : '') + '">' +
+      '<div class="meta"><span class="badge ' + l.src + '">' + BADGE[l.src] + '</span>' +
+      (fresh.has(l.id) ? '<span class="new-mark">новое</span>' : '') +
+      '<span>' + ago(l.ts) + '</span></div>' +
+      '<div class="meta" style="margin-top:6px"><span class="place">' + esc(l.place) + '</span>' +
+      (l.author ? '<span>· ' + esc(l.author) + '</span>' : '') + '</div>' +
+      '<div class="text ' + (long ? 'clip' : '') + '">' + esc(l.text) + '</div>' +
+      (long ? '<button class="more" data-open="' + esc(l.id) + '">Показать полностью</button>' : '') +
+      (l.tags.length ? '<div class="tags">' + l.tags.map((t) => '<span class="tag ' + (t === 'срочно' ? 'hot' : '') + '">' + esc(t) + '</span>').join('') + '</div>' : '') +
+      '<div class="actions"><a class="btn" href="' + esc(safeUrl(l.url)) + '" target="_blank" rel="noopener">Открыть пост</a>' +
+      '<button class="hide" data-hide="' + esc(l.id) + '">Скрыть</button></div></article>';
+  }).join('');
+}
+
+function renderSources() {
+  const rows = sourceReport?.sources || [];
+  if (!rows.length) { $('sourceSummary').textContent = 'Источники: проверка ещё не выполнена'; return; }
+  const available = rows.filter(s => s.ok).length;
+  const scanned = rows.reduce((n,s) => n + (s.scanned || 0), 0);
+  $('sourceSummary').textContent = 'Источники: доступны ' + available + ' из ' + rows.length + ' · проверено постов: ' + scanned;
+  $('sourceList').innerHTML = rows.map(s => '<div class="source-row"><a href="' + esc(safeUrl(s.url)) + '" target="_blank" rel="noopener">' + esc(s.title) + '</a><span class="availability ' + (s.ok ? 'ok' : '') + '">' + (s.ok ? 'Доступен' : 'Недоступен') + '</span><small>' + esc(s.kind) + ' · проверено: ' + Number(s.scanned || 0) + ' · совпадений до удаления повторов: ' + Number(s.matched || 0) + (s.note ? ' · ' + esc(s.note) : '') + '</small></div>').join('');
+}
+function render() { renderStatus(); renderSources(); renderBar(); renderFeed(); }
+
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [880, 1175].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.value = f; o.connect(g); g.connect(ctx.destination);
+      const t = ctx.currentTime + i * 0.16;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.start(t); o.stop(t + 0.32);
+    });
+  } catch (_) {}
+}
+
+function notify(items) {
+  beep();
+  unread += items.length;
+  document.title = '(' + unread + ') Фоторадар';
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  for (const l of items.slice(0, 3)) {
+    const title = 'Ищут фотографа · ' + l.place, opts = { body: l.text.slice(0, 180), icon: 'icon-192.png', data: { url: l.url } };
+    try {
+      if (swReg) swReg.showNotification(title, opts);
+      else { const n = new Notification(title, opts); n.onclick = () => window.open(safeUrl(l.url), '_blank'); }
+    } catch (_) {}
+  }
+}
+
+async function load() {
+  try {
+    const bust = '?t=' + Date.now();
+    const [a, b, c] = await Promise.all([
+      fetch('data/leads.json' + bust, { cache: 'no-store' }),
+      fetch('data/status.json' + bust, { cache: 'no-store' }),
+      fetch('data/sources.json' + bust, { cache: 'no-store' }).catch(() => null),
+    ]);
+    if (a.ok) leads = await a.json();
+    if (b.ok) status = await b.json();
+    if (c && c.ok) sourceReport = await c.json();
+  } catch (_) { /* нет сети — попробуем в следующий раз */ }
+  const news = leads.filter((l) => !known.has(l.id));
+  if (news.length) {
+    news.forEach((l) => known.add(l.id));
+    store.set('known', [...known].slice(-2000));
+    if (!firstVisit || !firstLoad) news.forEach((l) => fresh.add(l.id));
+    if (!firstLoad) notify(news);
+  }
+  firstLoad = false;
+  render();
+}
+
+$('refreshBtn').onclick = async () => {
+  const button = $('refreshBtn');
+  button.disabled = true;
+  $('refreshNote').textContent = 'Проверяем опубликованные результаты…';
+  try {
+    await load();
+    $('refreshNote').textContent = status?.checked
+      ? 'Последняя опубликованная проверка: ' + ago(status.checked) + '. Эта кнопка обновляет ленту; новый сбор запускается через «Найти сейчас».'
+      : 'Результаты пока недоступны. Попробуйте обновить ленту позже.';
+  } finally { button.disabled = false; }
+};
+
+// ── уведомления ──
+function b64ToBytes(s) {
+  const pad = '='.repeat((4 - (s.length % 4)) % 4);
+  const raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+}
+
+function updateNotifyBtn() {
+  const b = $('notifyBtn');
+  if ('Notification' in window && Notification.permission === 'granted') { b.textContent = 'Уведомления включены'; b.className = 'btn on'; }
+}
+
+async function setupPush(interactive) {
+  if (!('serviceWorker' in navigator)) return;
+  swReg = await navigator.serviceWorker.register('sw.js');
+  if (!('PushManager' in window)) return;
+  const r = await fetch('push-key.txt', { cache: 'no-store' }).catch(() => null);
+  if (!r || !r.ok) return;
+  const key = (await r.text()).trim();
+  if (!key) return;
+  await navigator.serviceWorker.ready;
+  let sub = await swReg.pushManager.getSubscription();
+  if (!sub && interactive) sub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) });
+  if (sub && interactive && store.get('pushShown', '') !== sub.endpoint) {
+    $('pushCode').value = JSON.stringify(sub);
+    $('pushDialog').showModal();
+    store.set('pushShown', sub.endpoint);
+  }
+}
+
+$('notifyBtn').onclick = async () => {
+  if (!('Notification' in window)) {
+    alert('На iPhone сначала добавьте сайт на экран «Домой»: кнопка «Поделиться» → «На экран Домой», затем откройте его оттуда и нажмите эту кнопку ещё раз.');
+    return;
+  }
+  if (Notification.permission === 'granted') {  // повторное нажатие — показать код ещё раз
+    store.set('pushShown', '');
+  } else if ((await Notification.requestPermission()) !== 'granted') {
+    alert('Уведомления запрещены в настройках браузера для этого сайта. Разрешите их и нажмите кнопку снова.');
+    return;
+  }
+  updateNotifyBtn();
+  beep();
+  try { await setupPush(true); } catch (e) { console.warn(e); }
+};
+$('pushClose').onclick = () => $('pushDialog').close();
+$('pushCopy').onclick = async () => {
+  $('pushCode').select();
+  try { await navigator.clipboard.writeText($('pushCode').value); } catch (_) { document.execCommand('copy'); }
+  $('pushCopy').textContent = 'Скопировано';
+};
+
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-f],[data-hide],[data-open]');
+  if (!t) return;
+  if (t.dataset.f) { filter = t.dataset.f; }
+  if (t.dataset.hide) { hidden.add(t.dataset.hide); store.set('hidden', [...hidden].slice(-2000)); }
+  if (t.dataset.open) { opened.add(t.dataset.open); }
+  renderBar(); renderFeed();
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { unread = 0; document.title = 'Фоторадар'; load(); }
+});
+
+updateSearch();
+updateNotifyBtn();
+if ('Notification' in window && Notification.permission === 'granted') setupPush(false).catch(() => {});
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>

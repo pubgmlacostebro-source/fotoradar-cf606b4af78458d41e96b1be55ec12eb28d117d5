@@ -1,0 +1,35 @@
+{
+ "checked": 1794865615,
+ "sources": {
+  "vk": {
+   "title": "ВКонтакте",
+   "ok": false,
+   "note": "нет ключа VK_TOKEN"
+  },
+  "tg_web": {
+   "title": "Telegram-каналы",
+   "ok": true,
+   "note": "Доступно 17/17 каналов; проверено 328 постов"
+  },
+  "tg_public": {
+   "title": "Telegram: открытые чаты",
+   "ok": true,
+   "note": "chatphotomeet: checked 16, last post 39804; rusvacant_ekb: checked 32, last post 341629"
+  },
+  "tg_chats": {
+   "title": "Telegram: дополнительные чаты (API)",
+   "ok": false,
+   "note": "не подключён Telegram-аккаунт"
+  },
+  "rss": {
+   "title": "Биржи",
+   "ok": true,
+   "note": ""
+  },
+  "jobs": {
+   "title": "Работа России",
+   "ok": true,
+   "note": "Проверено 8 вакансий; подходят 0"
+  }
+ }
+}
