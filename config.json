@@ -1,0 +1,89 @@
+{
+  "city_words": [
+    "екатеринбург",
+    "екб",
+    "екат",
+    "свердловск",
+    "ekb",
+    "ekaterinburg",
+    "yekaterinburg"
+  ],
+  "max_age_hours": 72,
+  "keep_days": 14,
+  "vk": {
+    "queries": [
+      "ищу фотографа Екатеринбург",
+      "нужен фотограф Екатеринбург",
+      "требуется фотограф Екатеринбург",
+      "ищу фотографа ЕКБ",
+      "нужен фотограф ЕКБ",
+      "посоветуйте фотографа Екатеринбург",
+      "ищем фотографа Екатеринбург",
+      "нужна фотосессия Екатеринбург",
+      "ищу фотографа на свадьбу Екатеринбург",
+      "ищу фотографа новогодняя Екатеринбург"
+    ],
+    "groups": []
+  },
+  "telegram_channels": {
+    "local": [
+      "mama_ekb",
+      "tfpekb1",
+      "poisk_ekat",
+      "vakansii_ekbz",
+      "rabota_ekaterinburgs",
+      "ekaterinburg_rabotaa",
+      "rabotavekaterinburge",
+      "withababy",
+      "Smirnovskie",
+      "okz_mom",
+      "Ekaterinburg_moms"
+    ],
+    "other": [
+      "rusvacant",
+      "photomodelmsk",
+      "photomodelspb",
+      "vacancysmm",
+      "worldeventjob",
+      "tfprus"
+    ]
+  },
+  "telegram_chats": {
+    "scan_joined": true,
+    "local": [
+      "tfp_ekb",
+      "tfp_ekaterinburg",
+      "photographers_ekb",
+      "ekb_uslugi",
+      "baraholka_ekb",
+      "ekb_chat"
+    ],
+    "other": []
+  },
+  "rss": [
+    {
+      "name": "FL.ru",
+      "url": "https://www.fl.ru/rss/all.xml",
+      "local": false
+    }
+  ],
+  "telegram_public_chats": [
+    {
+      "username": "chatphotomeet",
+      "title": "Чат фотографов ФОТОМИТ | Екатеринбург",
+      "seed_message_id": 39803
+    },
+    {
+      "username": "rusvacant_ekb",
+      "title": "Екатеринбург / Срочные вакансии / Запрос услуг",
+      "seed_message_id": 341624
+    }
+  ],
+  "trudvsem": {
+    "enabled": true,
+    "region": "6600000000000",
+    "query": "фотограф",
+    "city": "Екатеринбург"
+  },
+  "telegram_web_pages": 3
+}
