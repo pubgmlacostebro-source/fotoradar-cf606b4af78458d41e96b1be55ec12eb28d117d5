@@ -1,0 +1,67 @@
+name: Фоторадар — сбор объявлений
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  push:
+    branches: [main]
+    paths: ["docs/**", ".github/workflows/collect.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore website files on first run
+        run: |
+          if [ ! -f docs/index.html ]; then
+            python -m zipfile -e site-files.zip .
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Собрать объявления
+        run: python collector.py
+        env:
+          VK_TOKEN: ${{ secrets.VK_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION: ${{ secrets.TG_SESSION }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PUSH_SUBSCRIPTIONS: ${{ secrets.PUSH_SUBSCRIPTIONS }}
+      - name: Сохранить ленту
+        run: |
+          git config user.name "fotoradar-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs tools research
+          if git diff --cached --quiet; then
+            echo "Изменений нет"
+          else
+            git commit -m "Обновление ленты"
+            git push
+          fi
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Publish website
+        id: deployment
+        uses: actions/deploy-pages@v4
