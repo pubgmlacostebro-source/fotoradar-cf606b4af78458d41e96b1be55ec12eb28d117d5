@@ -11,15 +11,31 @@
   const settings = document.createElement('button'); settings.className = 'btn ghost'; settings.textContent = 'Подключение GitHub';
   button.insertAdjacentElement('afterend', settings);
   const dialog = document.createElement('dialog');
-  dialog.innerHTML = `<h2>Запуск поиска</h2><p>Создайте Fine-grained token: Only select repositories → этот Фоторадар; Repository permissions → Actions: Read and write. Остальные права не добавляйте. Доступ Actions позволяет также управлять запусками этого репозитория.</p><p><a href="https://github.com/settings/personal-access-tokens/new?name=Fotoradar-run&target_name=pubgmlacostebro-source&expires_in=30&actions=write" target="_blank" rel="noopener noreferrer">Создать ключ на GitHub ↗</a></p><label>Ключ GitHub <input id="runToken" type="password" autocomplete="off" spellcheck="false" style="width:100%"></label><p>Ключ хранится только в памяти этой вкладки и отправляется только api.github.com. После закрытия вкладки подключите заново. Не присылайте ключ в чат.</p><p id="runSetupError" role="status"></p><button id="runConnect" class="btn">Подключить</button> <button id="runDisconnect" class="btn ghost">Отключить</button> <button id="runClose" class="btn ghost">Закрыть</button>`;
+  dialog.innerHTML = `<h2>Запуск поиска</h2><p>Создайте Fine-grained token: Only select repositories → этот Фоторадар; Repository permissions → Actions: Read and write. Остальные права не добавляйте. Доступ Actions позволяет также управлять запусками этого репозитория.</p><p><a href="https://github.com/settings/personal-access-tokens/new?name=Fotoradar-run&target_name=pubgmlacostebro-source&expires_in=30&actions=write" target="_blank" rel="noopener noreferrer">Создать ключ на GitHub ↗</a></p><label>Ключ GitHub <input id="runToken" type="password" autocomplete="off" spellcheck="false" style="width:100%"></label><p>Ключ сохраняется в этом браузере и отправляется только api.github.com. После закрытия вкладки вводить его повторно не нужно. Для удаления нажмите «Забыть ключ». Когда срок ключа истечёт, подключите новый. Не присылайте ключ в чат.</p><p id="runSetupError" role="status"></p><button id="runConnect" class="btn">Подключить</button> <button id="runDisconnect" class="btn ghost">Отключить</button> <button id="runClose" class="btn ghost">Закрыть</button>`;
   document.body.append(dialog);
+  const tokenStorageKey = 'fotoradar:github-token:' + repo;
   let token = '', busy = false;
+  try { token = localStorage.getItem(tokenStorageKey) || ''; } catch (_) {}
+  function updateConnection() { settings.textContent = token ? 'GitHub подключён' : 'Подключение GitHub'; }
+  function forgetToken() {
+    token = '';
+    updateConnection();
+    try { localStorage.removeItem(tokenStorageKey); return true; } catch (_) { return false; }
+  }
+  dialog.querySelector('#runDisconnect').textContent = 'Забыть ключ';
+  // Keep storage scoped to this project. Never put credentials in URLs or repository files.
+  updateConnection();
   settings.onclick = () => dialog.showModal();
   dialog.querySelector('#runClose').onclick = () => dialog.close();
-  dialog.querySelector('#runDisconnect').onclick = () => { token = ''; dialog.querySelector('#runToken').value = ''; dialog.close(); note.textContent = 'GitHub отключён.'; };
+  dialog.querySelector('#runDisconnect').onclick = () => {
+    const removed = forgetToken();
+    dialog.querySelector('#runToken').value = ''; dialog.close();
+    note.textContent = removed ? 'Ключ удалён из этого браузера.' : 'Доступ отключён в этой вкладке. Браузер не разрешил удалить сохранённый ключ — очистите данные сайта в его настройках.';
+  };
   async function request(path, options = {}) {
     const r = await fetch(api + path, { ...options, headers: { Accept:'application/vnd.github+json', Authorization:'Bearer ' + token, 'X-GitHub-Api-Version':'2022-11-28', ...(options.body ? {'Content-Type':'application/json'} : {}) }});
-    if (!r.ok) throw new Error(r.status === 401 ? 'Ключ недействителен или истёк.' : r.status === 403 || r.status === 404 ? 'Нет доступа. Проверьте выбранный репозиторий и право Actions: Read and write.' : `GitHub вернул HTTP ${r.status}.`);
+    if (r.status === 401) forgetToken();
+    if (!r.ok) throw new Error(r.status === 401 ? 'Ключ недействителен или истёк. Подключите новый ключ.' : r.status === 403 || r.status === 404 ? 'Нет доступа. Проверьте выбранный репозиторий и право Actions: Read and write.' : `GitHub вернул HTTP ${r.status}.`);
     return r.status === 204 ? null : r.json();
   }
   dialog.querySelector('#runConnect').onclick = async () => {
@@ -27,8 +43,14 @@
     dialog.querySelector('#runToken').value = '';
     const error = dialog.querySelector('#runSetupError'); error.textContent = '';
     if (!token) { error.textContent = 'Введите ключ.'; return; }
-    try { await request('/actions/workflows/collect.yml'); dialog.close(); note.textContent = 'Подключено. Нажмите «Найти сейчас».'; }
-    catch (e) { token = ''; error.textContent = e.message; }
+    try {
+      await request('/actions/workflows/collect.yml');
+      let remembered = false;
+      try { localStorage.setItem(tokenStorageKey, token); remembered = true; } catch (_) {}
+      updateConnection(); dialog.close();
+      note.textContent = remembered ? 'Ключ сохранён в этом браузере. Нажмите «Найти сейчас».' : 'Подключено на эту вкладку. Браузер запретил сохранение ключа; после закрытия потребуется ввести его снова.';
+    }
+    catch (e) { forgetToken(); error.textContent = e.message; }
   };
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   button.onclick = async () => {
