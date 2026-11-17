@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Фоторадар: собирает из открытых источников объявления людей, которые ищут фотографа.
+"""Никарадар: собирает из открытых источников объявления людей, которые ищут фотографа.
 
 Источники (каждый включается сам, если для него есть ключи):
   - ВКонтакте: поиск по всем открытым постам + стены групп   (нужен VK_TOKEN)
@@ -82,7 +82,13 @@ TAGS = [
 TAGS = [(name, re.compile(rx, re.I)) for name, rx in TAGS]
 RE_PRICE = re.compile(r"\d[\d\s]{1,7}\s*(?:₽|руб|р\.|р\b|тыс|т\.р|к\b)|бюджет|оплат\w+|цена\s+договорн\w+|"
                       r"по\s+договор[её]нности|договоримся", re.I)
-RE_CITY = re.compile(r"(?<![а-яёa-z])(?:" + "|".join(map(re.escape, CFG["city_words"])) + r")", re.I)
+RE_CITY = re.compile(r"(?<![а-яёa-z])(?:екатеринбург(?:е|а|у|ом)?|екб|ekb|ekaterinburg|yekaterinburg)(?![а-яёa-z])", re.I)
+RE_OTHER_CITY = re.compile(r"\b(?:пышм\w*|бер[её]зовск\w*|арамиль\w*|первоуральск\w*|среднеуральск\w*|полевск\w*|тагил\w*|челябинск\w*|москв\w*|петербург\w*|спб|тюмен\w*|камeнск\w*|каменск\w*|краснотурьинск\w*|ревд\w*)\b", re.I)
+
+def city_allowed(text, local=False):
+    # A trusted local feed supplies context only when the post names no other city.
+    return not RE_OTHER_CITY.search(text) and (local or bool(RE_CITY.search(text)))
+
 
 
 def classify(text, local, extra=""):
@@ -93,11 +99,13 @@ def classify(text, local, extra=""):
         return None
     if not text or len(text) < 15:
         return None
+    if re.search(r"(?:подскажите|посоветуйте|ищу|нужн\w*)[^.!?]{0,45}(?:локаци|фотостуди|мест[ао]\s+для)", text, re.I) and not RE_STRONG.search(text):
+        return None
     if not RE_DEMAND.search(text):
         return None
     if RE_OFFER.search(text) and not RE_STRONG.search(text):
         return None
-    if not local and not RE_CITY.search(text + " " + extra):
+    if not city_allowed(text, local):
         return None
     tags = [name for name, rx in TAGS if rx.search(text)]
     if RE_PRICE.search(text):
@@ -216,8 +224,8 @@ def relevant_text(text, local, extra=''):
     # National digests can mention multiple cities. Never take a photographer
     # request from Moscow just because the same digest contains Yekaterinburg.
     parts = re.split(r'(?m)(?=^\s*\d+[.)]\s*(?:\(|#))|(?=🎭)', text)
-    if len(parts) > 1 and not local:
-        selected = [p for p in parts if classify(p, False, extra=extra) is not None]
+    if len(parts) > 1:
+        selected = [p for p in parts if classify(p, local, extra=extra) is not None]
         return '\n'.join(selected) if selected else None
     return text if classify(text, local, extra=extra) is not None else None
 
@@ -517,7 +525,7 @@ def fetch_profi():
             if not any(str(x.get('id')) == '26500' or str(x.get('topId')) == '26500' for x in services):
                 continue
             places = ' '.join(x.get('name','') for x in row.get('geoplaces',[]))
-            if 'екатеринбург' not in places.casefold() and places not in ['Ботанический','Академический','Центральный']:
+            if not city_allowed(places, True) or ('екатеринбург' not in places.casefold() and places not in ['Ботанический','Академический','Центральный']):
                 continue
             raw = re.sub(r'\s*\([^)]*\)$', '', row.get('receivd',''))
             try:
@@ -553,7 +561,7 @@ def json_ld_objects(page):
                 pending.extend(item.get('@graph', []))
 
 
-def parse_hh_vacancy(page, url):
+def parse_hh_vacancy(page, url, platform='hh'):
     for job in json_ld_objects(page):
         if job.get('@type') != 'JobPosting' or not re.search(r'\bфотограф(?:\b|/)', job.get('title',''), re.I):
             continue
@@ -573,35 +581,35 @@ def parse_hh_vacancy(page, url):
         if not CUTOFF <= ts <= NOW + 300:
             continue
         ident = url.rsplit('/',1)[-1]
-        if not re.fullmatch(r'https://ekaterinburg\.hh\.ru/vacancy/\d+',url): continue
+        if not re.fullmatch(rf'https://ekaterinburg\.{platform}\.ru/vacancy/\d+',url): continue
         company = job.get('hiringOrganization',{}).get('name','')
         text = '\n'.join(filter(None,['Вакансия: '+job['title'],company,strip_html(job.get('description',''))]))
         tags = ['вакансия']
         if job.get('baseSalary'): tags.append('есть бюджет')
-        return make_lead('jobs','hh:'+ident,'hh.ru · Екатеринбург',url,text,company,ts,tags)
+        return make_lead('jobs',platform+':'+ident,platform+'.ru · Екатеринбург',url,text,company,ts,tags)
     return None
 
 
-def fetch_hh_web():
-    url = 'https://ekaterinburg.hh.ru/vacancies/fotograf'
+def fetch_hh_web(platform='hh'):
+    url = f'https://ekaterinburg.{platform}.ru/vacancies/fotograf'
     try:
         page = http_get(url, timeout=20)
         lists = [x for x in json_ld_objects(page) if x.get('@type') == 'ItemList']
         if not lists: raise ValueError('Public vacancy list unavailable')
         urls = list(dict.fromkeys(x.get('url','') for block in lists for x in block.get('itemListElement',[])
-            if re.fullmatch(r'https://ekaterinburg\.hh\.ru/vacancy/\d+',x.get('url',''))))[:12]
+            if re.fullmatch(rf'https://ekaterinburg\.{platform}\.ru/vacancy/\d+',x.get('url',''))))[:12]
         def one(link):
-            try: return parse_hh_vacancy(http_get(link, timeout=18), link), ''
+            try: return parse_hh_vacancy(http_get(link, timeout=18), link, platform), ''
             except Exception as exc: return None, type(exc).__name__
         with ThreadPoolExecutor(max_workers=4) as pool: results = list(pool.map(one, urls))
         out = [lead for lead,error in results if lead]
         failures = sum(bool(error) for lead,error in results)
         if urls and failures == len(urls): raise ValueError('Vacancy detail pages unavailable')
         note = f'Открытые страницы: проверено {len(urls)}, подходят {len(out)}; ошибки {failures}. Только фотографы в Екатеринбурге за последние 72 часа.'
-        record_source('hh_web','hh.ru — фотограф, Екатеринбург',url,'Вакансии',True,len(urls),len(out),max([x['ts'] for x in out], default=0),note)
+        record_source(platform+'_web',platform+'.ru — фотограф, Екатеринбург',url,'Вакансии',True,len(urls),len(out),max([x['ts'] for x in out], default=0),note)
         return out,note
     except Exception as exc:
-        record_source('hh_web','hh.ru — фотограф, Екатеринбург',url,'Вакансии',False,note=str(exc)[:160])
+        record_source(platform+'_web',platform+'.ru — фотограф, Екатеринбург',url,'Вакансии',False,note=str(exc)[:160])
         return None,type(exc).__name__+': '+str(exc)[:160]
 
 
@@ -618,7 +626,7 @@ def send_push(new_leads):
     claims_sub = f"https://github.com/{repo}" if repo else "https://github.com"
     recent = [l for l in new_leads if l["ts"] > NOW - 6 * 3600] or new_leads[:1]
     if len(recent) > 4:
-        payloads = [{"title": f"Фоторадар: {len(recent)} новых объявлений",
+        payloads = [{"title": f"Никарадар: {len(recent)} новых объявлений",
                      "body": recent[0]["text"][:140], "url": "./"}]
     else:
         payloads = [{"title": f"Ищут фотографа · {l['place']}"[:80],
@@ -646,13 +654,15 @@ def main():
     SOURCE_REPORT.clear()
     DATA.mkdir(parents=True, exist_ok=True)
     old = load_json(LEADS_FILE, [])
+    local_channels = set(CFG['telegram_channels']['local']) | {x['username'] for x in CFG.get('telegram_public_chats', [])}
+    old = [l for l in old if (l.get('src') != 'tg' or classify(l.get('text',''), urllib.parse.urlparse(l.get('url','')).path.strip('/').split('/')[0] in local_channels) is not None) and city_allowed(l.get('text',''), True)]
     old_status = load_json(STATUS_FILE, {})
     known_ids = {l["id"] for l in old}
     known_h = {l["h"] for l in old}
 
     sources = [("vk", "ВКонтакте", fetch_vk), ("tg_web", "Telegram-каналы", fetch_tg_web),
                ("tg_public", "Telegram: открытые чаты", fetch_tg_public),
-               ("tg_chats", "Telegram: дополнительные чаты (API)", fetch_tg_chats), ("rss", "FL.ru", fetch_rss), ("profi", "Профи.ру", fetch_profi), ("hh_web", "hh.ru", fetch_hh_web), ("jobs", "Работа России", fetch_trudvsem)]
+               ("tg_chats", "Telegram: дополнительные чаты (API)", fetch_tg_chats), ("rss", "FL.ru", fetch_rss), ("profi", "Профи.ру", fetch_profi), ("hh_web", "hh.ru", fetch_hh_web), ("zarplata_web", "Зарплата.ру", lambda: fetch_hh_web("zarplata")), ("jobs", "Работа России", fetch_trudvsem)]
     status_sources, new = {}, []
     for key, title, fn in sources:
         try:

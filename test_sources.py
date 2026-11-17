@@ -10,6 +10,22 @@ class SourceTests(unittest.TestCase):
         c.SOURCE_REPORT.clear()
         self.now = dt.datetime.now(dt.timezone.utc).isoformat()
 
+    def test_city_and_location_requests(self):
+        self.assertIsNone(c.classify('Нужен фотограф в Верхней Пышме завтра', True))
+        self.assertIsNone(c.classify('Нужен фотограф в Берёзовском на свадьбу', True))
+        self.assertIsNone(c.classify('Нужен фотограф в Москве завтра', True))
+        self.assertIsNone(c.classify('Ищу фотографа на завтра', False, 'Екатеринбург'))
+        self.assertIsNone(c.classify('Подскажите уличные локации для свадебной съёмки', True))
+        self.assertIsNotNone(c.classify('Нужен фотограф на корпоратив, Фрунзе 35а', True))
+        self.assertIsNotNone(c.classify('Нужен фотограф в Екатеринбурге завтра', False))
+
+    def test_zarplata_identity_and_origin(self):
+        job={'@type':'JobPosting','title':'Фотограф','datePosted':self.now,'jobLocation':{'address':{'addressLocality':'Екатеринбург'}}}
+        page='<script type="application/ld+json">'+json.dumps(job)+'</script>'
+        lead=c.parse_hh_vacancy(page,'https://ekaterinburg.zarplata.ru/vacancy/123','zarplata')
+        self.assertEqual(lead['id'],'jobs:zarplata:123')
+        self.assertIsNone(c.parse_hh_vacancy(page,'https://evil.example/vacancy/123','zarplata'))
+
     def widget(self, mid, text='Ищу фотографа на свадьбу в Екатеринбурге'):
         return f'<div data-post="chatphotomeet/{mid}"><div class="tgme_widget_message_text js-message_text">{text}</div><time datetime="{self.now}"></time></div>'
 

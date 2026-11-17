@@ -1,11 +1,11 @@
-// Сервис-воркер Фоторадара: показывает уведомления, даже когда сайт закрыт.
+// Сервис-воркер Никарадара: показывает уведомления, даже когда сайт закрыт.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('push', (event) => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch (_) { d = { body: event.data && event.data.text() }; }
-  event.waitUntil(self.registration.showNotification(d.title || 'Фоторадар', {
+  event.waitUntil(self.registration.showNotification(d.title || 'Никарадар', {
     body: d.body || 'Новое объявление',
     icon: 'icon-192.png',
     badge: 'icon-192.png',

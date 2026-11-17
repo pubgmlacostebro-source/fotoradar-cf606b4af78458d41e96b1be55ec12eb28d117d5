@@ -2,8 +2,6 @@
   "city_words": [
     "екатеринбург",
     "екб",
-    "екат",
-    "свердловск",
     "ekb",
     "ekaterinburg",
     "yekaterinburg"
@@ -37,7 +35,8 @@
       "withababy",
       "Smirnovskie",
       "okz_mom",
-      "Ekaterinburg_moms"
+      "Ekaterinburg_moms",
+      "photomeetekb"
     ],
     "other": [
       "rusvacant",
@@ -45,7 +44,10 @@
       "photomodelspb",
       "vacancysmm",
       "worldeventjob",
-      "tfprus"
+      "tfprus",
+      "dnevnikactor",
+      "normrabota",
+      "freelancer_tg"
     ]
   },
   "telegram_chats": {
@@ -85,5 +87,6 @@
     "query": "фотограф",
     "city": "Екатеринбург"
   },
-  "telegram_web_pages": 3
+  "telegram_web_pages": 3,
+  "city": "Екатеринбург"
 }

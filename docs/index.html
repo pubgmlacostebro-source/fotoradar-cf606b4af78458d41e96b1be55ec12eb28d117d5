@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="referrer" content="no-referrer">
-<title>Фоторадар</title>
+<title>Никарадар</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -119,6 +119,20 @@ summary { cursor: pointer; font-weight: 600; }
 .external-panel { padding-top: 12px; font-size: 14px; }
 .external-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 10px; }
 #searchType { font: inherit; padding: 10px; border-radius: 10px; border: 1px solid var(--line); color: var(--text); background: var(--bg); max-width: 100%; }
+
+/* Motion runs once for each newly displayed card, never on periodic refresh. */
+@keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes breathe { 50% { opacity: .55; } }
+header { animation: arrive .5s ease-out both; }
+.card.enter { animation: arrive .38s ease-out both; }
+button, a.btn, .chip, .card { transition: transform .18s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease; }
+button:active, a.btn:active { transform: scale(.97); }
+button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (hover: hover) { .card:hover { border-color: var(--accent); box-shadow: 0 8px 24px #0000000c; } .btn:hover { transform: translateY(-2px); } }
+#manualRunBtn[aria-disabled="true"] { animation: breathe 1.3s ease-in-out infinite; }
+dialog[open], .hide-notice:not([hidden]) { animation: arrive .22s ease-out; }
+.city-label { display: inline-block; margin-top: 5px; padding: 2px 9px; border: 1px solid var(--line); border-radius: 99px; color: var(--accent); font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 </style>
 </head>
 <body>
@@ -126,7 +140,7 @@ summary { cursor: pointer; font-weight: 600; }
   <header>
     <img class="logo" src="icon-192.png" alt="">
     <div class="grow">
-      <h1>Фоторадар</h1>
+      <h1>Никарадар</h1><span class="city-label">Только Екатеринбург</span>
       <p class="sub">Кто ищет фотографа в Екатеринбурге</p>
     </div>
     <button class="btn" id="notifyBtn">Включить уведомления</button>
@@ -154,7 +168,7 @@ summary { cursor: pointer; font-weight: 600; }
       <button class="btn ghost" id="searchReset" type="button">Сбросить</button>
     </div>
     <p id="searchCount" class="sub" aria-live="polite"></p>
-    <p class="sub">Поиск по объявлениям, которые уже собрал Фоторадар.</p>
+    <p class="sub">Поиск по объявлениям, которые уже собрал Никарадар.</p>
     <a id="vkSearch" target="_blank" rel="noopener" class="external-search">Искать этот запрос во ВКонтакте ↗</a>
   <details class="external-panel"><summary>Поиск на других площадках</summary>
       <p class="sub">Открываются отдельно. Профи.ру и hh.ru также проверяются сборщиком; остальные ссылки — ручной поиск. Условия отклика проверяйте на площадках.</p>
@@ -176,7 +190,7 @@ summary { cursor: pointer; font-weight: 600; }
 
 <dialog id="pushDialog">
   <h2>Последний шаг</h2>
-  <p>Уведомления на открытом сайте уже работают. Чтобы они приходили и при закрытом сайте, скопируйте этот код и отправьте тому, кто настраивал Фоторадар — его нужно один раз добавить в настройки (PUSH_SUBSCRIPTIONS).</p>
+  <p>Уведомления на открытом сайте уже работают. Чтобы они приходили и при закрытом сайте, скопируйте этот код и отправьте тому, кто настраивал Никарадар — его нужно один раз добавить в настройки (PUSH_SUBSCRIPTIONS).</p>
   <textarea id="pushCode" readonly></textarea>
   <div class="row">
     <button class="btn ghost" id="pushClose">Закрыть</button>
@@ -281,6 +295,7 @@ function renderBar() {
     '<button class="chip ' + (filter === k ? 'active' : '') + '" data-f="' + k + '">' + t + '<b>' + count(k) + '</b></button>').join('');
 }
 
+const animatedCards = new Set();
 function renderFeed() {
   renderVisibility();
   const matching = leads.filter((l) => matchesSearch(l) &&
@@ -305,8 +320,9 @@ function renderFeed() {
     return;
   }
   $('feed').innerHTML = list.map((l) => {
+    const entrance = !animatedCards.has(l.id); animatedCards.add(l.id);
     const long = l.text.length > 420 && !opened.has(l.id);
-    return '<article class="card ' + (fresh.has(l.id) ? 'fresh' : '') + '">' +
+    return '<article class="card ' + (fresh.has(l.id) ? 'fresh' : '') + (entrance ? ' enter' : '') + '">' +
       '<div class="meta"><span class="badge ' + l.src + '">' + BADGE[l.src] + '</span>' +
       (fresh.has(l.id) ? '<span class="new-mark">новое</span>' : '') +
       '<span>' + ago(l.ts) + '</span></div>' +
@@ -349,7 +365,7 @@ function beep() {
 function notify(items) {
   beep();
   unread += items.length;
-  document.title = '(' + unread + ') Фоторадар';
+  document.title = '(' + unread + ') Никарадар';
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   for (const l of items.slice(0, 3)) {
     const title = 'Ищут фотографа · ' + l.place, opts = { body: l.text.slice(0, 180), icon: 'icon-192.png', data: { url: l.url } };
@@ -457,7 +473,7 @@ document.addEventListener('click', (e) => {
   renderBar(); renderFeed();
 });
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) { unread = 0; document.title = 'Фоторадар'; load(); }
+  if (!document.hidden) { unread = 0; document.title = 'Никарадар'; load(); }
 });
 
 updateSearch();
