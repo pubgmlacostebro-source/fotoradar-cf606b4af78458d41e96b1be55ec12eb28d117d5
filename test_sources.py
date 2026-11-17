@@ -26,6 +26,15 @@ class SourceTests(unittest.TestCase):
         self.assertEqual(lead['id'],'jobs:zarplata:123')
         self.assertIsNone(c.parse_hh_vacancy(page,'https://evil.example/vacancy/123','zarplata'))
 
+    def test_push_uses_valid_vapid_contact_and_timeout(self):
+        from py_vapid import _check_sub
+        lead={'ts':c.NOW,'text':'Ищу фотографа в Екатеринбурге','place':'Екатеринбург','url':'https://t.me/example/1'}
+        env={'PUSH_SUBSCRIPTIONS':'[{"endpoint":"https://example.com"}]','VAPID_PRIVATE_KEY':'test-only','GITHUB_REPOSITORY':'pubgmlacostebro-source/fotoradar'}
+        with patch.dict(c.os.environ,env), patch('pywebpush.webpush') as send:
+            c.send_push([lead])
+        self.assertTrue(_check_sub(send.call_args.kwargs['vapid_claims']['sub']))
+        self.assertEqual(send.call_args.kwargs['timeout'],20)
+
     def widget(self, mid, text='Ищу фотографа на свадьбу в Екатеринбурге'):
         return f'<div data-post="chatphotomeet/{mid}"><div class="tgme_widget_message_text js-message_text">{text}</div><time datetime="{self.now}"></time></div>'
 
