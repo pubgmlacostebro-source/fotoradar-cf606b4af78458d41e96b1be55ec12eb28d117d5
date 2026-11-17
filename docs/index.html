@@ -85,6 +85,10 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .actions { display: flex; gap: 8px; align-items: center; }
 .actions a.btn { text-decoration: none; display: inline-block; }
 .hide { margin-left: auto; color: var(--muted); font-size: 14px; padding: 8px 4px; }
+.visibility-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+.visibility-controls button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.hide-notice { margin-bottom: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); font-size: 14px; }
+.hide-notice button { margin-left: 10px; }
 
 .empty { text-align: center; color: var(--muted); padding: 48px 12px; border: 1px dashed var(--line); border-radius: 16px; }
 .empty strong { display: block; color: var(--text); font-size: 17px; margin-bottom: 6px; }
@@ -157,6 +161,16 @@ summary { cursor: pointer; font-weight: 600; }
       <div class="external-links"><a href="https://youdo.com/g-ekb/rabota/fotovideouslugi" target="_blank" rel="noopener">YouDo</a><a href="https://profi.ru/geo-ekt/krasota/photographer/" target="_blank" rel="noopener">Профи.ру</a><a id="avitoSearch" target="_blank" rel="noopener">Авито</a><a id="hhSearch" target="_blank" rel="noopener">hh.ru</a><a id="webSearch" target="_blank" rel="noopener">Поиск в интернете</a></div>
     </details>
   </section>
+  <nav class="visibility-controls" aria-label="Видимость объявлений">
+    <button class="btn ghost" id="activeViewBtn" type="button" aria-pressed="true">Лента</button>
+    <button class="btn ghost" id="hiddenViewBtn" type="button" aria-pressed="false">Скрытые (0)</button>
+    <button class="btn ghost" id="restoreAllBtn" type="button" hidden>Вернуть все в ленту</button>
+  </nav>
+  <p id="visibilityNote" class="sub"></p>
+  <div id="hideNotice" class="hide-notice" role="status" aria-live="polite" hidden>
+    Объявление перемещено в «Скрытые».
+    <button class="btn ghost" id="undoHideBtn" type="button">Отменить</button>
+  </div>
   <main id="feed"></main>
 </div>
 
@@ -183,6 +197,30 @@ let sourceReport = null;
 let leads = [], status = null, filter = 'all', firstLoad = true, unread = 0, swReg = null;
 const known = new Set(store.get('known', []));
 const hidden = new Set(store.get('hidden', []));
+let showHidden = false, lastHiddenId = null;
+function inCurrentView(lead) { return showHidden ? hidden.has(lead.id) : !hidden.has(lead.id); }
+function saveHidden() { store.set('hidden', [...hidden].slice(-2000)); }
+function renderVisibility() {
+  const count = leads.filter(l => hidden.has(l.id)).length;
+  $('activeViewBtn').setAttribute('aria-pressed', String(!showHidden));
+  $('hiddenViewBtn').setAttribute('aria-pressed', String(showHidden));
+  $('hiddenViewBtn').textContent = 'Скрытые (' + count + ')';
+  $('restoreAllBtn').hidden = !showHidden || hidden.size === 0;
+  $('visibilityNote').textContent = showHidden
+    ? 'Скрыто только в этом браузере. Нажмите «Вернуть в ленту», чтобы восстановить объявление.'
+    : count ? 'Есть скрытые объявления. Их можно вернуть в разделе «Скрытые».' : '';
+  $('hideNotice').hidden = !lastHiddenId || !hidden.has(lastHiddenId);
+}
+$('activeViewBtn').onclick = () => { showHidden = false; renderBar(); renderFeed(); };
+$('hiddenViewBtn').onclick = () => { showHidden = true; renderBar(); renderFeed(); };
+$('undoHideBtn').onclick = () => {
+  if (lastHiddenId) hidden.delete(lastHiddenId);
+  lastHiddenId = null; saveHidden(); renderBar(); renderFeed();
+};
+$('restoreAllBtn').onclick = () => {
+  hidden.clear(); lastHiddenId = null; showHidden = false;
+  saveHidden(); renderBar(); renderFeed();
+};
 const fresh = new Set();
 const opened = new Set();
 const firstVisit = known.size === 0;
@@ -236,7 +274,7 @@ function renderStatus() {
 }
 
 function renderBar() {
-  const visible = leads.filter((l) => !hidden.has(l.id) && matchesSearch(l));
+  const visible = leads.filter((l) => inCurrentView(l) && matchesSearch(l));
   const count = (k) => visible.filter((l) => k === 'all' || l.src === k || (k === 'hot' && l.tags.includes('срочно'))).length;
   const chips = [['all', 'Все'], ['hot', 'Срочные'], ['vk', SRC.vk], ['tg', SRC.tg], ['rss', SRC.rss], ['jobs', SRC.jobs]];
   $('bar').innerHTML = chips.map(([k, t]) =>
@@ -244,14 +282,24 @@ function renderBar() {
 }
 
 function renderFeed() {
-  const list = leads.filter((l) => !hidden.has(l.id) && matchesSearch(l) &&
+  renderVisibility();
+  const matching = leads.filter((l) => matchesSearch(l) &&
     (filter === 'all' || l.src === filter || (filter === 'hot' && l.tags.includes('срочно'))));
+  const list = matching.filter(inCurrentView);
   $('searchCount').textContent = 'Найдено: ' + list.length;
   if (!list.length && (searchQuery.trim() || searchDays || searchType !== 'all')) {
     $('feed').innerHTML = '<div class="empty"><strong>По вашему запросу ничего не найдено</strong>Попробуйте другие слова или увеличьте период поиска.</div>';
     return;
   }
   if (!list.length) {
+    if (showHidden) {
+      $('feed').innerHTML = '<div class="empty"><strong>Скрытых объявлений нет</strong>Нажмите «Лента», чтобы вернуться к объявлениям.</div>';
+      return;
+    }
+    if (matching.some(l => hidden.has(l.id))) {
+      $('feed').innerHTML = '<div class="empty"><strong>Объявления скрыты</strong>Откройте «Скрытые», чтобы посмотреть их и вернуть в ленту.</div>';
+      return;
+    }
     $('feed').innerHTML = '<div class="empty"><strong>Пока объявлений нет</strong>' +
       'В проверенных источниках за выбранный период совпадений нет. Это не означает, что заказов нет в других группах или комментариях.</div>';
     return;
@@ -268,7 +316,9 @@ function renderFeed() {
       (long ? '<button class="more" data-open="' + esc(l.id) + '">Показать полностью</button>' : '') +
       (l.tags.length ? '<div class="tags">' + l.tags.map((t) => '<span class="tag ' + (t === 'срочно' ? 'hot' : '') + '">' + esc(t) + '</span>').join('') + '</div>' : '') +
       '<div class="actions"><a class="btn" href="' + esc(safeUrl(l.url)) + '" target="_blank" rel="noopener">Открыть пост</a>' +
-      '<button class="hide" data-hide="' + esc(l.id) + '">Скрыть</button></div></article>';
+      (showHidden
+        ? '<button class="hide" data-restore="' + esc(l.id) + '">Вернуть в ленту</button>'
+        : '<button class="hide" data-hide="' + esc(l.id) + '">В скрытые</button>') + '</div></article>';
   }).join('');
 }
 
@@ -398,10 +448,11 @@ $('pushCopy').onclick = async () => {
 };
 
 document.addEventListener('click', (e) => {
-  const t = e.target.closest('[data-f],[data-hide],[data-open]');
+  const t = e.target.closest('[data-f],[data-hide],[data-open],[data-restore]');
   if (!t) return;
   if (t.dataset.f) { filter = t.dataset.f; }
-  if (t.dataset.hide) { hidden.add(t.dataset.hide); store.set('hidden', [...hidden].slice(-2000)); }
+  if (t.dataset.hide) { hidden.add(t.dataset.hide); lastHiddenId = t.dataset.hide; saveHidden(); }
+  if (t.dataset.restore) { hidden.delete(t.dataset.restore); if (lastHiddenId === t.dataset.restore) lastHiddenId = null; saveHidden(); }
   if (t.dataset.open) { opened.add(t.dataset.open); }
   renderBar(); renderFeed();
 });
@@ -417,3 +468,4 @@ setInterval(load, 60000);
 </script>
 <script src="run-search.js"></script></body>
 </html>
+
