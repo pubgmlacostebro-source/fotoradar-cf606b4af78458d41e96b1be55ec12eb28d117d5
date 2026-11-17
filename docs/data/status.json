@@ -1,5 +1,5 @@
 {
- "checked": 1794923170,
+ "checked": 1794925078,
  "sources": {
   "vk": {
    "title": "ВКонтакте",
@@ -9,12 +9,12 @@
   "tg_web": {
    "title": "Telegram-каналы",
    "ok": true,
-   "note": "Доступно 17/17 каналов; проверено 331 постов"
+   "note": "Доступно 21/21 каналов; проверено 377 постов"
   },
   "tg_public": {
    "title": "Telegram: открытые чаты",
    "ok": true,
-   "note": "chatphotomeet: checked 32, last post 39828; rusvacant_ekb: checked 32, last post 341660"
+   "note": "chatphotomeet: checked 16, last post 39828; rusvacant_ekb: checked 16, last post 341660"
   },
   "tg_chats": {
    "title": "Telegram: дополнительные чаты (API)",
@@ -35,6 +35,11 @@
    "title": "hh.ru",
    "ok": true,
    "note": "Открытые страницы: проверено 12, подходят 4; ошибки 0. Только фотографы в Екатеринбурге за последние 72 часа."
+  },
+  "zarplata_web": {
+   "title": "Зарплата.ру",
+   "ok": true,
+   "note": "Открытые страницы: проверено 12, подходят 3; ошибки 0. Только фотографы в Екатеринбурге за последние 72 часа."
   },
   "jobs": {
    "title": "Работа России",
