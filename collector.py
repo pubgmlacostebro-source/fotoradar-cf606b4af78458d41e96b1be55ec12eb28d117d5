@@ -623,7 +623,8 @@ def send_push(new_leads):
     if isinstance(subs, dict):
         subs = [subs]
     repo = os.environ.get("GITHUB_REPOSITORY", "")
-    claims_sub = f"https://github.com/{repo}" if repo else "https://github.com"
+    owner = repo.partition("/")[0]
+    claims_sub = f"https://{owner}.github.io" if owner else "https://github.com"
     recent = [l for l in new_leads if l["ts"] > NOW - 6 * 3600] or new_leads[:1]
     if len(recent) > 4:
         payloads = [{"title": f"Никарадар: {len(recent)} новых объявлений",
@@ -631,14 +632,17 @@ def send_push(new_leads):
     else:
         payloads = [{"title": f"Ищут фотографа · {l['place']}"[:80],
                      "body": l["text"][:180], "url": l["url"]} for l in recent]
+    delivered, failed = 0, 0
     for sub in subs:
         for p in payloads:
             try:
                 webpush(sub, json.dumps(p, ensure_ascii=False), vapid_private_key=key,
-                        vapid_claims={"sub": claims_sub}, ttl=6 * 3600)
+                        vapid_claims={"sub": claims_sub}, ttl=6 * 3600, timeout=20)
+                delivered += 1
             except WebPushException as e:
-                log("push: ошибка", getattr(e.response, "status_code", ""), str(e)[:120])
-    log(f"push: отправлено {len(payloads)} уведомл. на {len(subs)} устройств")
+                failed += 1
+                log("push: ошибка HTTP", getattr(e.response, "status_code", "неизвестно"))
+    log(f"push: принято сервером {delivered}, ошибок {failed}, устройств {len(subs)}")
 
 
 # ──────────────────────────────────── запуск ────────────────────────────────────
