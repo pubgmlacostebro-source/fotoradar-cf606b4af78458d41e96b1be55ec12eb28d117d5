@@ -85,4 +85,24 @@ class ProfiTests(unittest.TestCase):
             leads,note=c.fetch_profi()
         self.assertIsNone(leads)
 
+class HhWebTests(unittest.TestCase):
+    def test_only_dated_photographer_jobs_in_city(self):
+        job={'@type':'JobPosting','title':'Фотограф','datePosted':dt.datetime.now(dt.timezone.utc).isoformat(),
+             'jobLocation':{'address':{'addressLocality':'Екатеринбург'}},'description':'Съёмка мероприятий'}
+        def page(data): return '<script type="application/ld+json">'+json.dumps(data)+'</script>'
+        link='https://ekaterinburg.hh.ru/vacancy/123'
+        lead=c.parse_hh_vacancy(page(job),link)
+        self.assertEqual(lead['url'],link)
+        self.assertIn('вакансия',lead['tags'])
+        for changed in [dict(job,datePosted='2020-01-01T00:00:00+03:00'), dict(job,datePosted=''),
+                        dict(job,jobLocation={'address':{'addressLocality':'Москва'}}),dict(job,title='Ретушер фотографий')]:
+            self.assertIsNone(c.parse_hh_vacancy(page(changed),link))
+        self.assertIsNone(c.parse_hh_vacancy(page(job),'https://example.org/vacancy/123'))
+
+    def test_unavailable_is_reported(self):
+        with patch.object(c,'http_get',side_effect=RuntimeError('HTTP 403')):
+            leads,note=c.fetch_hh_web()
+        self.assertIsNone(leads)
+        self.assertFalse(c.SOURCE_REPORT[-1]['ok'])
+
 if __name__=='__main__': unittest.main()

@@ -8,24 +8,31 @@
   const note = document.getElementById('refreshNote');
   const description = button.parentElement.parentElement.querySelector('p.sub');
   if (description) description.textContent = 'Запускает новый сбор на GitHub и ждёт публикации результатов. При первом запуске подключите GitHub.';
-  const settings = document.createElement('button'); settings.className = 'btn ghost'; settings.textContent = 'Подключение GitHub';
+  const settings = document.createElement('button'); settings.className = 'btn ghost'; settings.textContent = 'Настройка поиска';
   button.insertAdjacentElement('afterend', settings);
   const dialog = document.createElement('dialog');
-  dialog.innerHTML = `<h2>Запуск поиска</h2><p>Создайте Fine-grained token: Only select repositories → этот Фоторадар; Repository permissions → Actions: Read and write. Остальные права не добавляйте. Доступ Actions позволяет также управлять запусками этого репозитория.</p><p><a href="https://github.com/settings/personal-access-tokens/new?name=Fotoradar-run&target_name=pubgmlacostebro-source&expires_in=30&actions=write" target="_blank" rel="noopener noreferrer">Создать ключ на GitHub ↗</a></p><label>Ключ GitHub <input id="runToken" type="password" autocomplete="off" spellcheck="false" style="width:100%"></label><p>Ключ сохраняется в этом браузере и отправляется только api.github.com. После закрытия вкладки вводить его повторно не нужно. Для удаления нажмите «Забыть ключ». Когда срок ключа истечёт, подключите новый. Не присылайте ключ в чат.</p><p id="runSetupError" role="status"></p><button id="runConnect" class="btn">Подключить</button> <button id="runDisconnect" class="btn ghost">Отключить</button> <button id="runClose" class="btn ghost">Закрыть</button>`;
+  dialog.innerHTML = `<h2>Настройка запуска поиска</h2><p id="runConnectionStatus" role="status"></p><div id="runTokenFields"><p>Создайте Fine-grained token: Only select repositories → этот Фоторадар; Repository permissions → Actions: Read and write. Остальные права не добавляйте. Доступ Actions позволяет также управлять запусками этого репозитория.</p><p><a href="https://github.com/settings/personal-access-tokens/new?name=Fotoradar-run&target_name=pubgmlacostebro-source&expires_in=30&actions=write" target="_blank" rel="noopener noreferrer">Создать ключ на GitHub ↗</a></p><label>Ключ GitHub <input id="runToken" type="password" autocomplete="off" spellcheck="false" style="width:100%"></label><p>Ключ сохраняется в этом браузере и отправляется только api.github.com. После закрытия вкладки вводить его повторно не нужно. Для удаления нажмите «Забыть ключ». Когда срок ключа истечёт, подключите новый. Не присылайте ключ в чат.</p></div><button id="runChange" class="btn ghost">Сменить ключ</button><p id="runSetupError" role="status"></p><button id="runConnect" class="btn">Подключить</button> <button id="runDisconnect" class="btn ghost">Отключить</button> <button id="runClose" class="btn ghost">Закрыть</button>`;
   document.body.append(dialog);
   const tokenStorageKey = 'fotoradar:github-token:' + repo;
-  let token = '', busy = false;
-  try { token = localStorage.getItem(tokenStorageKey) || ''; } catch (_) {}
-  function updateConnection() { settings.textContent = token ? 'GitHub подключён' : 'Подключение GitHub'; }
+  let token = '', busy = false, tokenRemembered = false;
+  try { token = localStorage.getItem(tokenStorageKey) || ''; tokenRemembered = Boolean(token); } catch (_) {}
+  function updateConnection() {
+    settings.textContent = token ? 'Поиск подключён' : 'Настройка поиска';
+    dialog.querySelector('#runConnectionStatus').textContent = token ? (tokenRemembered ? 'Ключ уже сохранён. Вводить его повторно не нужно: закройте это окно и нажмите «Найти сейчас».' : 'Подключено только в этой вкладке: браузер запретил сохранение. Для сохранения разрешите хранение данных сайта.') : 'Нужно один раз разрешить сайту запускать сбор. После подключения ключ сохраняется в этом браузере.';
+    dialog.querySelector('#runTokenFields').hidden = Boolean(token);
+    dialog.querySelector('#runChange').hidden = !token;
+    dialog.querySelector('#runConnect').textContent = token ? 'Готово' : 'Подключить и запомнить';
+  }
   function forgetToken() {
-    token = '';
+    token = ''; tokenRemembered = false;
     updateConnection();
     try { localStorage.removeItem(tokenStorageKey); return true; } catch (_) { return false; }
   }
   dialog.querySelector('#runDisconnect').textContent = 'Забыть ключ';
   // Keep storage scoped to this project. Never put credentials in URLs or repository files.
   updateConnection();
-  settings.onclick = () => dialog.showModal();
+  settings.onclick = () => { updateConnection(); dialog.showModal(); };
+  dialog.querySelector('#runChange').onclick = () => { dialog.querySelector('#runTokenFields').hidden = false; dialog.querySelector('#runConnect').textContent = 'Сохранить ключ'; };
   dialog.querySelector('#runClose').onclick = () => dialog.close();
   dialog.querySelector('#runDisconnect').onclick = () => {
     const removed = forgetToken();
@@ -39,15 +46,17 @@
     return r.status === 204 ? null : r.json();
   }
   dialog.querySelector('#runConnect').onclick = async () => {
-    token = dialog.querySelector('#runToken').value.trim();
+    if (token && dialog.querySelector('#runTokenFields').hidden) { dialog.close(); return; }
+    const enteredToken = dialog.querySelector('#runToken').value.trim();
     dialog.querySelector('#runToken').value = '';
     const error = dialog.querySelector('#runSetupError'); error.textContent = '';
-    if (!token) { error.textContent = 'Введите ключ.'; return; }
+    if (!enteredToken) { error.textContent = 'Введите ключ.'; return; }
+    token = enteredToken;
     try {
       await request('/actions/workflows/collect.yml');
       let remembered = false;
       try { localStorage.setItem(tokenStorageKey, token); remembered = true; } catch (_) {}
-      updateConnection(); dialog.close();
+      tokenRemembered = remembered; updateConnection(); dialog.close();
       note.textContent = remembered ? 'Ключ сохранён в этом браузере. Нажмите «Найти сейчас».' : 'Подключено на эту вкладку. Браузер запретил сохранение ключа; после закрытия потребуется ввести его снова.';
     }
     catch (e) { forgetToken(); error.textContent = e.message; }

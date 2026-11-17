@@ -152,6 +152,7 @@ def vk_names(resp):
 def fetch_vk():
     token = os.environ.get("VK_TOKEN", "").strip()
     if not token:
+        record_source('vk_api','ВКонтакте — поиск постов','https://vk.com/search','VK',False,note='Не подключён API-доступ VK; ссылка поиска не означает автоматический сбор')
         return None, "нет ключа VK_TOKEN"
     out, errors = [], []
 
@@ -539,6 +540,71 @@ def fetch_profi():
         record_source('profi','Профи.ру — заказы фотографам',url,'Заказы',False,note=str(exc)[:150])
         return None, type(exc).__name__ + ': ' + str(exc)[:150]
 
+def json_ld_objects(page):
+    for match in re.finditer(r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', page, re.S | re.I):
+        try:
+            value = json.loads(match.group(1))
+        except ValueError:
+            continue
+        pending = value if isinstance(value, list) else [value]
+        for item in pending:
+            if isinstance(item, dict):
+                yield item
+                pending.extend(item.get('@graph', []))
+
+
+def parse_hh_vacancy(page, url):
+    for job in json_ld_objects(page):
+        if job.get('@type') != 'JobPosting' or not re.search(r'\bфотограф(?:\b|/)', job.get('title',''), re.I):
+            continue
+        locations = job.get('jobLocation', [])
+        if isinstance(locations, dict): locations = [locations]
+        if not any(x.get('address',{}).get('addressLocality','').casefold() == 'екатеринбург' for x in locations):
+            continue
+        try:
+            posted = dt.datetime.fromisoformat(job['datePosted'].replace('Z','+00:00'))
+            if posted.tzinfo is None: continue
+            ts = posted.timestamp()
+            if job.get('validThrough'):
+                expires = dt.datetime.fromisoformat(job['validThrough'].replace('Z','+00:00'))
+                if expires.tzinfo is not None and expires.timestamp() < NOW: continue
+        except (KeyError, ValueError, TypeError):
+            continue
+        if not CUTOFF <= ts <= NOW + 300:
+            continue
+        ident = url.rsplit('/',1)[-1]
+        if not re.fullmatch(r'https://ekaterinburg\.hh\.ru/vacancy/\d+',url): continue
+        company = job.get('hiringOrganization',{}).get('name','')
+        text = '\n'.join(filter(None,['Вакансия: '+job['title'],company,strip_html(job.get('description',''))]))
+        tags = ['вакансия']
+        if job.get('baseSalary'): tags.append('есть бюджет')
+        return make_lead('jobs','hh:'+ident,'hh.ru · Екатеринбург',url,text,company,ts,tags)
+    return None
+
+
+def fetch_hh_web():
+    url = 'https://ekaterinburg.hh.ru/vacancies/fotograf'
+    try:
+        page = http_get(url, timeout=20)
+        lists = [x for x in json_ld_objects(page) if x.get('@type') == 'ItemList']
+        if not lists: raise ValueError('Public vacancy list unavailable')
+        urls = list(dict.fromkeys(x.get('url','') for block in lists for x in block.get('itemListElement',[])
+            if re.fullmatch(r'https://ekaterinburg\.hh\.ru/vacancy/\d+',x.get('url',''))))[:12]
+        def one(link):
+            try: return parse_hh_vacancy(http_get(link, timeout=18), link), ''
+            except Exception as exc: return None, type(exc).__name__
+        with ThreadPoolExecutor(max_workers=4) as pool: results = list(pool.map(one, urls))
+        out = [lead for lead,error in results if lead]
+        failures = sum(bool(error) for lead,error in results)
+        if urls and failures == len(urls): raise ValueError('Vacancy detail pages unavailable')
+        note = f'Открытые страницы: проверено {len(urls)}, подходят {len(out)}; ошибки {failures}. Только фотографы в Екатеринбурге за последние 72 часа.'
+        record_source('hh_web','hh.ru — фотограф, Екатеринбург',url,'Вакансии',True,len(urls),len(out),max([x['ts'] for x in out], default=0),note)
+        return out,note
+    except Exception as exc:
+        record_source('hh_web','hh.ru — фотограф, Екатеринбург',url,'Вакансии',False,note=str(exc)[:160])
+        return None,type(exc).__name__+': '+str(exc)[:160]
+
+
 def send_push(new_leads):
     subs_raw = os.environ.get("PUSH_SUBSCRIPTIONS", "").strip()
     key = os.environ.get("VAPID_PRIVATE_KEY", "").strip()
@@ -586,7 +652,7 @@ def main():
 
     sources = [("vk", "ВКонтакте", fetch_vk), ("tg_web", "Telegram-каналы", fetch_tg_web),
                ("tg_public", "Telegram: открытые чаты", fetch_tg_public),
-               ("tg_chats", "Telegram: дополнительные чаты (API)", fetch_tg_chats), ("rss", "FL.ru", fetch_rss), ("profi", "Профи.ру", fetch_profi), ("jobs", "Работа России", fetch_trudvsem)]
+               ("tg_chats", "Telegram: дополнительные чаты (API)", fetch_tg_chats), ("rss", "FL.ru", fetch_rss), ("profi", "Профи.ру", fetch_profi), ("hh_web", "hh.ru", fetch_hh_web), ("jobs", "Работа России", fetch_trudvsem)]
     status_sources, new = {}, []
     for key, title, fn in sources:
         try:

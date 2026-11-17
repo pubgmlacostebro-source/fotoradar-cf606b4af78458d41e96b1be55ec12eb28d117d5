@@ -44,6 +44,8 @@ async function scenario(failDispatch) {
     assert.equal(saved.size,1,'remember a validated key');
     elements.clear(); dispatched=false; loaded=false; calls.length=0;
     vm.runInNewContext(script,context);
+    await get('#runConnect').onclick();
+    assert.equal(calls.length,0,'closing saved-key setup must not demand a new key');
     await get('manualRunBtn').onclick();
     assert.equal(loaded,true,'a fresh page can run without re-entering the key');
     get('#runDisconnect').onclick();

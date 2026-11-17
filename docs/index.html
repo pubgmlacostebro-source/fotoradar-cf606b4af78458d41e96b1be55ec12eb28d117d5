@@ -138,7 +138,7 @@ summary { cursor: pointer; font-weight: 600; }
       <button class="btn ghost" id="refreshBtn" type="button">Обновить результаты</button>
     </div>
     <p class="sub">Откроется GitHub. Нажмите <b>Run workflow</b>, затем ещё раз <b>Run workflow</b>. Нужен вход в аккаунт с правом запуска.</p>
-    <p class="sub">Когда поиск завершится, вернитесь сюда: лента обновляется автоматически. Поиск обычно занимает около минуты после старта, но возможна очередь GitHub.</p>
+    <p class="sub">Поиск обычно занимает около минуты. Дождитесь сообщения о завершении — новые ссылки появятся здесь автоматически. Возможна очередь GitHub.</p>
     <p class="sub" id="refreshNote" role="status" aria-live="polite"></p>
   </section>
   <div class="status" id="status"></div>
@@ -157,8 +157,8 @@ summary { cursor: pointer; font-weight: 600; }
     <p class="sub">Поиск по объявлениям, которые уже собрал Фоторадар.</p>
     <a id="vkSearch" target="_blank" rel="noopener" class="external-search">Искать этот запрос во ВКонтакте ↗</a>
   <details class="external-panel"><summary>Поиск на других площадках</summary>
-      <p class="sub">Открываются отдельно. Автосбор этих площадок не подключён; актуальность и условия отклика проверяйте на них.</p>
-      <div class="external-links"><a href="https://youdo.com/g-ekb/rabota/fotovideouslugi" target="_blank" rel="noopener">YouDo</a><a href="https://profi.ru/geo-ekt/krasota/photographer/" target="_blank" rel="noopener">Профи.ру</a><a id="avitoSearch" target="_blank" rel="noopener">Авито</a><a id="hhSearch" target="_blank" rel="noopener">hh.ru</a><a id="webSearch" target="_blank" rel="noopener">Поиск в интернете</a></div>
+      <p class="sub">Открываются отдельно. Профи.ру и hh.ru также проверяются сборщиком; остальные ссылки — ручной поиск. Условия отклика проверяйте на площадках.</p>
+      <div class="external-links"><a href="https://youdo.com/g-ekb/rabota/fotovideouslugi" target="_blank" rel="noopener">YouDo</a><a href="https://profi.ru/geo-ekt/rabota/krasota/rabota-sportivnym-fotografom/" target="_blank" rel="noopener">Профи.ру</a><a id="avitoSearch" target="_blank" rel="noopener">Авито</a><a id="hhSearch" target="_blank" rel="noopener">hh.ru</a><a id="webSearch" target="_blank" rel="noopener">Поиск в интернете</a></div>
     </details>
   </section>
   <nav class="visibility-controls" aria-label="Видимость объявлений">
@@ -468,4 +468,3 @@ setInterval(load, 60000);
 </script>
 <script src="run-search.js"></script></body>
 </html>
-
