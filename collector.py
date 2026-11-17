@@ -684,8 +684,8 @@ def main():
     keep_from = NOW - CFG["keep_days"] * 86400
     leads = sorted([l for l in new + old if l["ts"] >= keep_from], key=lambda l: -l["ts"])[:600]
 
-    if new or len(leads) != len(old) or not LEADS_FILE.exists():
-        LEADS_FILE.write_text(json.dumps(leads, ensure_ascii=False, indent=1), "utf-8")
+    # Persist removals made by the stricter geography filter as well.
+    LEADS_FILE.write_text(json.dumps(leads, ensure_ascii=False, indent=1), "utf-8")
     STATUS_FILE.write_text(json.dumps({'checked':int(NOW), 'sources':status_sources}, ensure_ascii=False, indent=1), 'utf-8')
     (DATA / 'sources.json').write_text(json.dumps({'checked':int(NOW), 'sources': SOURCE_REPORT}, ensure_ascii=False, indent=1), 'utf-8')
     if PENDING_TG_CURSORS is not None:
