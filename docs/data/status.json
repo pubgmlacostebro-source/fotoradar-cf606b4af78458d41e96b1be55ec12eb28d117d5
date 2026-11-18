@@ -1,5 +1,5 @@
 {
- "checked": 1795023815,
+ "checked": 1795026803,
  "sources": {
   "vk": {
    "title": "ВКонтакте",
@@ -8,13 +8,13 @@
   },
   "tg_web": {
    "title": "Telegram-каналы",
-   "ok": false,
-   "note": "Доступно 0/21 каналов; проверено 0 постов; mama_ekb: URLError: <urlopen error [Errno 101] Network is unreachable>; tfpekb1: URLError: <urlopen error [Errno 101] Network is unreachable>; poisk_ekat: URLError: <urlopen error [Errno 101] Network is unreachable>; vakansii_ekbz: URLError: <urlopen error [Errno 101] Network is unreachable>; rabota_ekaterinburgs: URLError: <urlopen error [Errno 101] Network is unreachable>; ekaterinburg_rabotaa: URLError: <urlopen error [Errno 101] Network is unreachable>; rabotavekaterinburge: URLError: <urlopen error [Errno 101] Network is unreachable>; withababy: "
+   "ok": true,
+   "note": "Доступно 21/21 каналов; проверено 375 постов"
   },
   "tg_public": {
    "title": "Telegram: открытые чаты",
-   "ok": false,
-   "note": "chatphotomeet: URLError; retry from 39840; chatphotomeet: checked 0, last post 39839; rusvacant_ekb: URLError; retry from 341685; rusvacant_ekb: checked 0, last post 341684"
+   "ok": true,
+   "note": "chatphotomeet: checked 16, last post 39839; rusvacant_ekb: checked 32, last post 341685"
   },
   "tg_chats": {
    "title": "Telegram: дополнительные чаты (API)",
