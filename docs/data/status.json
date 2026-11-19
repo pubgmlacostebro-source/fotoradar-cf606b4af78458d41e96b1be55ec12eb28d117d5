@@ -1,5 +1,5 @@
 {
- "checked": 1795113721,
+ "checked": 1795117671,
  "sources": {
   "vk": {
    "title": "ВКонтакте",
@@ -14,7 +14,7 @@
   "tg_public": {
    "title": "Telegram: открытые чаты",
    "ok": true,
-   "note": "chatphotomeet: checked 16, last post 39842; rusvacant_ekb: checked 16, last post 341717"
+   "note": "chatphotomeet: checked 16, last post 39842; rusvacant_ekb: checked 32, last post 341718"
   },
   "tg_chats": {
    "title": "Telegram: дополнительные чаты (API)",
