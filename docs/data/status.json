@@ -1,5 +1,5 @@
 {
- "checked": 1795066193,
+ "checked": 1795069752,
  "sources": {
   "vk": {
    "title": "ВКонтакте",
@@ -9,12 +9,12 @@
   "tg_web": {
    "title": "Telegram-каналы",
    "ok": true,
-   "note": "Доступно 21/21 каналов; проверено 377 постов"
+   "note": "Доступно 21/21 каналов; проверено 404 постов"
   },
   "tg_public": {
    "title": "Telegram: открытые чаты",
    "ok": true,
-   "note": "chatphotomeet: checked 16, last post 39839; rusvacant_ekb: checked 32, last post 341691"
+   "note": "chatphotomeet: checked 16, last post 39839; rusvacant_ekb: checked 32, last post 341695"
   },
   "tg_chats": {
    "title": "Telegram: дополнительные чаты (API)",
@@ -23,8 +23,8 @@
   },
   "rss": {
    "title": "FL.ru",
-   "ok": false,
-   "note": "FL.ru: HTTP Error 403: Forbidden"
+   "ok": true,
+   "note": ""
   },
   "profi": {
    "title": "Профи.ру",
