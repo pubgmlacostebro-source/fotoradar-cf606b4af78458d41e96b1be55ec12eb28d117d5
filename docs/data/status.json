@@ -1,5 +1,5 @@
 {
- "checked": 1795082001,
+ "checked": 1795085514,
  "sources": {
   "vk": {
    "title": "ВКонтакте",
@@ -9,12 +9,12 @@
   "tg_web": {
    "title": "Telegram-каналы",
    "ok": true,
-   "note": "Доступно 21/21 каналов; проверено 385 постов"
+   "note": "Доступно 21/21 каналов; проверено 407 постов"
   },
   "tg_public": {
    "title": "Telegram: открытые чаты",
    "ok": true,
-   "note": "chatphotomeet: checked 16, last post 39841; rusvacant_ekb: checked 32, last post 341706"
+   "note": "chatphotomeet: checked 32, last post 39842; rusvacant_ekb: checked 32, last post 341709"
   },
   "tg_chats": {
    "title": "Telegram: дополнительные чаты (API)",
@@ -23,8 +23,8 @@
   },
   "rss": {
    "title": "FL.ru",
-   "ok": false,
-   "note": "FL.ru: HTTP Error 403: Forbidden"
+   "ok": true,
+   "note": ""
   },
   "profi": {
    "title": "Профи.ру",
@@ -33,8 +33,8 @@
   },
   "hh_web": {
    "title": "hh.ru",
-   "ok": false,
-   "note": "ValueError: Public vacancy list unavailable"
+   "ok": true,
+   "note": "Открытые страницы: проверено 12, подходят 3; ошибки 0. Только фотографы в Екатеринбурге за последние 72 часа."
   },
   "zarplata_web": {
    "title": "Зарплата.ру",
@@ -44,7 +44,7 @@
   "jobs": {
    "title": "Работа России",
    "ok": true,
-   "note": "Проверено 9 вакансий; подходят 0"
+   "note": "Проверено 8 вакансий; подходят 0"
   }
  }
 }
