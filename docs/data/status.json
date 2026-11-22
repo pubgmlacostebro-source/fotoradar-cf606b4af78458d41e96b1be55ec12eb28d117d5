@@ -1,5 +1,5 @@
 {
- "checked": 1795304669,
+ "checked": 1795307018,
  "sources": {
   "vk": {
    "title": "ВКонтакте",
@@ -23,8 +23,8 @@
   },
   "rss": {
    "title": "FL.ru",
-   "ok": true,
-   "note": ""
+   "ok": false,
+   "note": "FL.ru: HTTP Error 403: Forbidden"
   },
   "profi": {
    "title": "Профи.ру",
