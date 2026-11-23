@@ -1,5 +1,5 @@
 {
- "checked": 1795427944,
+ "checked": 1795431758,
  "sources": {
   "vk": {
    "title": "ВКонтакте",
@@ -9,12 +9,12 @@
   "tg_web": {
    "title": "Telegram-каналы",
    "ok": true,
-   "note": "Доступно 21/21 каналов; проверено 388 постов"
+   "note": "Доступно 21/21 каналов; проверено 416 постов"
   },
   "tg_public": {
    "title": "Telegram: открытые чаты",
    "ok": true,
-   "note": "chatphotomeet: checked 16, last post 39859; rusvacant_ekb: checked 32, last post 341807"
+   "note": "chatphotomeet: checked 16, last post 39859; rusvacant_ekb: checked 32, last post 341809"
   },
   "tg_chats": {
    "title": "Telegram: дополнительные чаты (API)",
@@ -44,7 +44,7 @@
   "jobs": {
    "title": "Работа России",
    "ok": true,
-   "note": "Проверено 7 вакансий; подходят 0"
+   "note": "Проверено 8 вакансий; подходят 0"
   }
  }
 }
