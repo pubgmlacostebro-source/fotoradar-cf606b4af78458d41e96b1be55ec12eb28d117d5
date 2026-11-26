@@ -1,5 +1,5 @@
 {
- "checked": 1795662369,
+ "checked": 1795695431,
  "sources": [
   {
    "id": "vk_api",
@@ -7,7 +7,7 @@
    "url": "https://vk.com/search",
    "kind": "VK",
    "ok": false,
-   "checked": 1795662369,
+   "checked": 1795695431,
    "scanned": 0,
    "matched": 0,
    "latest": 0,
@@ -19,10 +19,10 @@
    "url": "https://t.me/mama_ekb",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662370,
+   "checked": 1795695432,
    "scanned": 12,
    "matched": 0,
-   "latest": 1795589572,
+   "latest": 1795693795,
    "note": ""
   },
   {
@@ -31,7 +31,7 @@
    "url": "https://t.me/tfpekb1",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662370,
+   "checked": 1795695432,
    "scanned": 14,
    "matched": 0,
    "latest": 1794836726,
@@ -43,10 +43,10 @@
    "url": "https://t.me/poisk_ekat",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662371,
-   "scanned": 28,
+   "checked": 1795695433,
+   "scanned": 32,
    "matched": 0,
-   "latest": 1795613538,
+   "latest": 1795692017,
    "note": ""
   },
   {
@@ -55,10 +55,10 @@
    "url": "https://t.me/vakansii_ekbz",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662371,
+   "checked": 1795695433,
    "scanned": 40,
    "matched": 0,
-   "latest": 1795632556,
+   "latest": 1795694089,
    "note": ""
   },
   {
@@ -67,10 +67,10 @@
    "url": "https://t.me/rabota_ekaterinburgs",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662371,
+   "checked": 1795695433,
    "scanned": 20,
    "matched": 0,
-   "latest": 1795591301,
+   "latest": 1795687408,
    "note": ""
   },
   {
@@ -79,10 +79,10 @@
    "url": "https://t.me/ekaterinburg_rabotaa",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662373,
+   "checked": 1795695435,
    "scanned": 60,
    "matched": 0,
-   "latest": 1795608436,
+   "latest": 1795694837,
    "note": ""
   },
   {
@@ -91,7 +91,7 @@
    "url": "https://t.me/rabotavekaterinburge",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662373,
+   "checked": 1795695435,
    "scanned": 20,
    "matched": 0,
    "latest": 1794217750,
@@ -103,10 +103,10 @@
    "url": "https://t.me/withababy",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662373,
-   "scanned": 6,
+   "checked": 1795695435,
+   "scanned": 5,
    "matched": 0,
-   "latest": 1795599379,
+   "latest": 1795685356,
    "note": ""
   },
   {
@@ -115,10 +115,10 @@
    "url": "https://t.me/Smirnovskie",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662373,
-   "scanned": 12,
+   "checked": 1795695435,
+   "scanned": 13,
    "matched": 0,
-   "latest": 1795659178,
+   "latest": 1795689785,
    "note": ""
   },
   {
@@ -127,7 +127,7 @@
    "url": "https://t.me/okz_mom",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662373,
+   "checked": 1795695435,
    "scanned": 8,
    "matched": 0,
    "latest": 1795590045,
@@ -139,10 +139,10 @@
    "url": "https://t.me/Ekaterinburg_moms",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662373,
+   "checked": 1795695435,
    "scanned": 20,
    "matched": 0,
-   "latest": 1795588579,
+   "latest": 1795682958,
    "note": ""
   },
   {
@@ -151,7 +151,7 @@
    "url": "https://t.me/photomeetekb",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662373,
+   "checked": 1795695435,
    "scanned": 4,
    "matched": 0,
    "latest": 1794316108,
@@ -163,7 +163,7 @@
    "url": "https://t.me/rusvacant",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662374,
+   "checked": 1795695436,
    "scanned": 20,
    "matched": 0,
    "latest": 1795460491,
@@ -175,8 +175,8 @@
    "url": "https://t.me/photomodelmsk",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662375,
-   "scanned": 23,
+   "checked": 1795695436,
+   "scanned": 9,
    "matched": 0,
    "latest": 1795630875,
    "note": ""
@@ -187,10 +187,10 @@
    "url": "https://t.me/photomodelspb",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662375,
-   "scanned": 12,
+   "checked": 1795695436,
+   "scanned": 11,
    "matched": 0,
-   "latest": 1795643436,
+   "latest": 1795663804,
    "note": ""
   },
   {
@@ -199,10 +199,10 @@
    "url": "https://t.me/vacancysmm",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662375,
+   "checked": 1795695436,
    "scanned": 20,
    "matched": 0,
-   "latest": 1795627217,
+   "latest": 1795691797,
    "note": ""
   },
   {
@@ -211,10 +211,10 @@
    "url": "https://t.me/worldeventjob",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662376,
-   "scanned": 40,
+   "checked": 1795695438,
+   "scanned": 39,
    "matched": 0,
-   "latest": 1795630213,
+   "latest": 1795692462,
    "note": ""
   },
   {
@@ -223,7 +223,7 @@
    "url": "https://t.me/tfprus",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662376,
+   "checked": 1795695438,
    "scanned": 8,
    "matched": 0,
    "latest": 1795592245,
@@ -235,7 +235,7 @@
    "url": "https://t.me/dnevnikactor",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662376,
+   "checked": 1795695438,
    "scanned": 8,
    "matched": 0,
    "latest": 1794638921,
@@ -247,10 +247,10 @@
    "url": "https://t.me/normrabota",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662376,
+   "checked": 1795695438,
    "scanned": 20,
    "matched": 0,
-   "latest": 1795521606,
+   "latest": 1795680005,
    "note": ""
   },
   {
@@ -259,7 +259,7 @@
    "url": "https://t.me/freelancer_tg",
    "kind": "Telegram-канал",
    "ok": true,
-   "checked": 1795662376,
+   "checked": 1795695438,
    "scanned": 15,
    "matched": 0,
    "latest": 1795619261,
@@ -271,11 +271,11 @@
    "url": "https://t.me/chatphotomeet",
    "kind": "Telegram-чат",
    "ok": true,
-   "checked": 1795662378,
-   "scanned": 16,
+   "checked": 1795695442,
+   "scanned": 32,
    "matched": 0,
    "latest": 0,
-   "note": "Последний доступный номер: 39896"
+   "note": "Последний доступный номер: 39909"
   },
   {
    "id": "tg:rusvacant_ekb",
@@ -283,11 +283,11 @@
    "url": "https://t.me/rusvacant_ekb",
    "kind": "Telegram-чат",
    "ok": true,
-   "checked": 1795662382,
+   "checked": 1795695446,
    "scanned": 32,
    "matched": 0,
    "latest": 0,
-   "note": "Последний доступный номер: 341862"
+   "note": "Последний доступный номер: 341878"
   },
   {
    "id": "profi",
@@ -295,7 +295,7 @@
    "url": "https://profi.ru/geo-ekt/rabota/krasota/rabota-sportivnym-fotografom/",
    "kind": "Заказы",
    "ok": true,
-   "checked": 1795662385,
+   "checked": 1795695451,
    "scanned": 4,
    "matched": 1,
    "latest": 1795526425,
@@ -307,10 +307,10 @@
    "url": "https://ekaterinburg.hh.ru/vacancies/fotograf",
    "kind": "Вакансии",
    "ok": true,
-   "checked": 1795662394,
+   "checked": 1795695460,
    "scanned": 12,
    "matched": 2,
-   "latest": 1795598129,
+   "latest": 1795678602,
    "note": "Открытые страницы: проверено 12, подходят 2; ошибки 0. Только фотографы в Екатеринбурге за последние 72 часа."
   },
   {
@@ -319,11 +319,11 @@
    "url": "https://ekaterinburg.zarplata.ru/vacancies/fotograf",
    "kind": "Вакансии",
    "ok": true,
-   "checked": 1795662402,
+   "checked": 1795695470,
    "scanned": 12,
-   "matched": 1,
-   "latest": 1795598129,
-   "note": "Открытые страницы: проверено 12, подходят 1; ошибки 0. Только фотографы в Екатеринбурге за последние 72 часа."
+   "matched": 2,
+   "latest": 1795678602,
+   "note": "Открытые страницы: проверено 12, подходят 2; ошибки 0. Только фотографы в Екатеринбурге за последние 72 часа."
   },
   {
    "id": "trudvsem",
@@ -331,7 +331,7 @@
    "url": "https://trudvsem.ru/vacancy/search",
    "kind": "Вакансии",
    "ok": true,
-   "checked": 1795662414,
+   "checked": 1795695490,
    "scanned": 8,
    "matched": 0,
    "latest": 0,
